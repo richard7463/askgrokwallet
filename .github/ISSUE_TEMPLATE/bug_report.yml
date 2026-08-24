@@ -1,0 +1,28 @@
+name: Bug report
+description: Something is broken — policy verdicts, approvals, receipts, or packaging.
+title: "[bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you expect and what actually happened?
+    validations:
+      required: true
+  - type: textarea
+    id: policy
+    attributes:
+      label: Policy used
+      description: Paste the plain-English policy text (and the request) that triggered the issue.
+      render: text
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Steps, commands, or a failing test.
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: Node version, agent (Grok Bot / Cursor / Claude), local or hosted.

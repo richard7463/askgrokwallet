@@ -4,3 +4,8 @@ data/
 .env
 .env.*
 *.log
+.vercel/
+.next/
+.hardhat-home/
+.hardhat-config/
+dist/

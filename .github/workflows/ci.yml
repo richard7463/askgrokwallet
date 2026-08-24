@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate plugin package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Structure smoke test
+        run: node scripts/smoke.mjs
+      - name: Manifests are valid JSON
+        run: |
+          python3 - <<'EOF'
+          import json, glob
+          for f in glob.glob("**/plugin.json", recursive=True):
+              json.load(open(f))
+              print("OK", f)
+          EOF
+      - name: SKILL.md frontmatter present
+        run: grep -q "^name: askgrokwallet" SKILL.md
+      - name: No obvious secrets
+        run: |
+          if grep -rEi --include="*" -n "(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,})" . | grep -v ".git/"; then
+            echo "possible secret found"; exit 1
+          fi
+          echo "no obvious secrets"
