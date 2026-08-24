@@ -25,7 +25,7 @@ jobs:
               print("OK", f)
           EOF
       - name: SKILL.md frontmatter present
-        run: grep -q "^name: askgrokwallet" SKILL.md
+        run: 'grep -q "^name: askgrokwallet" SKILL.md'
       - name: No obvious secrets
         run: |
           if grep -rEi --include="*" -n "(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,})" . | grep -v ".git/"; then
