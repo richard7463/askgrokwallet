@@ -1,12 +1,12 @@
 {
-  "name": "agent-gate",
-  "displayName": "AgentGate",
+  "name": "ask-wallet",
+  "displayName": "AskWallet",
   "version": "0.1.0",
-  "description": "Governed spending and actions for AI agents: plain-English policies, a human approval inbox, and signed receipts for every outcome.",
-  "author": "AgentGate",
+  "description": "A governed wallet for AI agents: plain-English policies, a human approval inbox, and signed receipts for every spend.",
+  "author": "AskWallet",
   "license": "MIT",
-  "homepage": "https://github.com/richard7463/agent-gate",
-  "repository": "https://github.com/richard7463/agent-gate",
+  "homepage": "https://github.com/richard7463/ask-wallet",
+  "repository": "https://github.com/richard7463/ask-wallet",
   "skills": ".",
   "logo": "assets/logo.svg"
 }

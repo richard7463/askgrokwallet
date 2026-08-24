@@ -1,12 +1,12 @@
 ---
-name: agent-gate
+name: ask-wallet
 description: >
-  Governed spending and actions for AI agents. Enforce budgets, allowlists,
-  operator modes, and human approval before money or consequential actions
-  move. Use when an agent wants to pay, trade, refund, or execute and a
-  human-defined policy must decide allow / ask / deny.
+  A governed wallet for AI agents. Enforce budgets, allowlists, operator
+  modes, and human approval before money or consequential actions move. Use
+  when an agent wants to pay, trade, refund, or execute and a human-defined
+  policy must decide allow / ask / deny.
 version: 0.1.0
-homepage: https://github.com/richard7463/agent-gate
+homepage: https://github.com/richard7463/ask-wallet
 metadata:
   emoji: 🔐
   category: governance
@@ -15,9 +15,9 @@ requires:
   bins: ["curl"]
 ---
 
-# AgentGate — governed actions for AI agents
+# AskWallet — a governed wallet for AI agents
 
-Agents can think, trade, and pay. AgentGate decides what they are allowed to
+Agents can think, trade, and pay. AskWallet decides what they are allowed to
 do — inside human-defined rules, with a verifiable receipt for every outcome.
 
 ```text
