@@ -1,8 +1,8 @@
 {
-  "name": "grokbotwallet",
+  "name": "agent-gate",
   "version": "0.1.0",
-  "description": "Governed wallet for Grok agents: budgets, allowlists, operator modes, and human approval before money or consequential actions move.",
-  "author": "grokbotwallet",
+  "description": "Governed spending and actions for AI agents: plain-English policies, a human approval inbox, and signed receipts for every outcome.",
+  "author": "AgentGate",
   "license": "MIT",
-  "homepage": "https://github.com/richard7463/grokbotwallet"
+  "homepage": "https://github.com/richard7463/agent-gate"
 }

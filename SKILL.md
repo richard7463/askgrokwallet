@@ -1,12 +1,12 @@
 ---
-name: grokbotwallet
+name: agent-gate
 description: >
-  Governed wallet for Grok agents. Enforce budgets, allowlists, operator modes,
-  and human approval before money or consequential actions move. Use when an
-  agent wants to pay, trade, refund, or execute and a human-defined policy must
-  decide allow / ask / deny.
+  Governed spending and actions for AI agents. Enforce budgets, allowlists,
+  operator modes, and human approval before money or consequential actions
+  move. Use when an agent wants to pay, trade, refund, or execute and a
+  human-defined policy must decide allow / ask / deny.
 version: 0.1.0
-homepage: https://grokbotwallet.io
+homepage: https://github.com/richard7463/agent-gate
 metadata:
   emoji: 🔐
   category: governance
@@ -15,11 +15,10 @@ requires:
   bins: ["curl"]
 ---
 
-# grokbotwallet — governed wallet for Grok agents
+# AgentGate — governed actions for AI agents
 
-Agents can think, trade, and pay. grokbotwallet decides what they are allowed
-to do — inside human-defined rules, with a verifiable receipt for every
-outcome.
+Agents can think, trade, and pay. AgentGate decides what they are allowed to
+do — inside human-defined rules, with a verifiable receipt for every outcome.
 
 ```text
 agent request -> policy (allow / ask / deny) -> execute or approve -> proof
