@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// AskWallet plugin — local structure validation
+// AskGrokWallet plugin — local structure validation
 import { readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,18 +14,18 @@ function fail(msg) {
 const skill = join(ROOT, "SKILL.md");
 if (!existsSync(skill)) fail("SKILL.md missing");
 const skillText = readFileSync(skill, "utf8");
-if (!skillText.includes("name: ask-wallet")) fail("SKILL.md missing frontmatter name");
+if (!skillText.includes("name: askgrokwallet")) fail("SKILL.md missing frontmatter name");
 
 const manifestPath = join(ROOT, ".grok-plugin", "plugin.json");
 if (!existsSync(manifestPath)) fail(".grok-plugin/plugin.json missing");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-if (manifest.name !== "ask-wallet") fail("plugin.json name mismatch");
+if (manifest.name !== "askgrokwallet") fail("plugin.json name mismatch");
 if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(manifest.name)) fail("name must be kebab-case");
 
 const cursorManifestPath = join(ROOT, ".cursor-plugin", "plugin.json");
 if (!existsSync(cursorManifestPath)) fail(".cursor-plugin/plugin.json missing");
 const cursorManifest = JSON.parse(readFileSync(cursorManifestPath, "utf8"));
-if (cursorManifest.name !== "ask-wallet") fail("cursor plugin.json name mismatch");
+if (cursorManifest.name !== "askgrokwallet") fail("cursor plugin.json name mismatch");
 
 const example = JSON.parse(readFileSync(join(ROOT, "examples", "approval-request.json"), "utf8"));
 if (!example.summary || !example.policyText) fail("approval-request.json incomplete");

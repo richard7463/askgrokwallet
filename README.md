@@ -1,13 +1,14 @@
-# AskWallet — a governed wallet for AI agents
+# AskGrokWallet — a governed wallet for Grok agents
 
-Agents can think, trade, and pay. AskWallet decides what they are allowed to
-do — inside human-defined rules, with a verifiable receipt for every outcome.
+Agents can think, trade, and pay. AskGrokWallet decides what they are allowed
+to do — inside human-defined rules, with a verifiable receipt for every
+outcome.
 
 ```text
 agent request -> policy (allow / ask / deny) -> execute or approve -> proof
 ```
 
-This repository is the **plugin package** for AskWallet (project codename:
+This repository is the **plugin package** for AskGrokWallet (project codename:
 `grokbotwallet`). The app itself (policy engine, approval inbox, vault
 contracts) lives in the project repo; this package is what agents install.
 
@@ -15,13 +16,13 @@ contracts) lives in the project repo; this package is what agents install.
 
 ```bash
 # From GitHub (recommended — pinned SHA)
-grok plugin install richard7463/ask-wallet --trust
+grok plugin install askgrokwallet/askgrokwallet --trust
 
 # Or from a local path during development
 grok plugin install ./integrations/grokbotwallet --trust
 ```
 
-After install, the `ask-wallet` skill appears in `/skills`. Enable it for a
+After install, the `askgrokwallet` skill appears in `/skills`. Enable it for a
 Bot via Settings → Plugins where needed.
 
 ## What the skill does
@@ -29,7 +30,7 @@ Bot via Settings → Plugins where needed.
 1. Compiles plain-English policy ("payments under $50 run automatically; over
    $50 ask me; never pay blacklisted merchants; daily budget $200").
 2. Evaluates every request: `allow` / `ask` / `deny`.
-3. `ask` requests land in the AskWallet approval inbox; the operator
+3. `ask` requests land in the AskGrokWallet approval inbox; the operator
    approves or denies from any device.
 4. Approved and blocked outcomes both produce a receipt.
 
@@ -53,7 +54,7 @@ Bot via Settings → Plugins where needed.
 
 ## Submit
 
-AskWallet is listed for both major marketplaces:
+AskGrokWallet is listed for both major marketplaces:
 
 - **xAI Grok Build marketplace** (via pinned-SHA catalog PR)
 - **Cursor Marketplace** (= Grok Bot app-in-marketplace; publish form:

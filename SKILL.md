@@ -1,12 +1,12 @@
 ---
-name: ask-wallet
+name: askgrokwallet
 description: >
-  A governed wallet for AI agents. Enforce budgets, allowlists, operator
-  modes, and human approval before money or consequential actions move. Use
-  when an agent wants to pay, trade, refund, or execute and a human-defined
-  policy must decide allow / ask / deny.
+  A governed wallet for Grok agents (and any AI agent). Enforce budgets,
+  allowlists, operator modes, and human approval before money or
+  consequential actions move. Use when an agent wants to pay, trade, refund,
+  or execute and a human-defined policy must decide allow / ask / deny.
 version: 0.1.0
-homepage: https://github.com/richard7463/ask-wallet
+homepage: https://github.com/askgrokwallet/askgrokwallet
 metadata:
   emoji: 🔐
   category: governance
@@ -15,10 +15,11 @@ requires:
   bins: ["curl"]
 ---
 
-# AskWallet — a governed wallet for AI agents
+# AskGrokWallet — a governed wallet for Grok agents
 
-Agents can think, trade, and pay. AskWallet decides what they are allowed to
-do — inside human-defined rules, with a verifiable receipt for every outcome.
+Agents can think, trade, and pay. AskGrokWallet decides what they are allowed
+to do — inside human-defined rules, with a verifiable receipt for every
+outcome.
 
 ```text
 agent request -> policy (allow / ask / deny) -> execute or approve -> proof

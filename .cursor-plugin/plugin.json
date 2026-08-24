@@ -1,12 +1,12 @@
 {
-  "name": "ask-wallet",
-  "displayName": "AskWallet",
+  "name": "askgrokwallet",
+  "displayName": "AskGrokWallet",
   "version": "0.1.0",
-  "description": "A governed wallet for AI agents: plain-English policies, a human approval inbox, and signed receipts for every spend.",
-  "author": "AskWallet",
+  "description": "A governed wallet for Grok agents (and any AI agent): plain-English policies, a human approval inbox, and signed receipts for every spend.",
+  "author": "AskGrokWallet",
   "license": "MIT",
-  "homepage": "https://github.com/richard7463/ask-wallet",
-  "repository": "https://github.com/richard7463/ask-wallet",
+  "homepage": "https://github.com/askgrokwallet/askgrokwallet",
+  "repository": "https://github.com/askgrokwallet/askgrokwallet",
   "skills": ".",
   "logo": "assets/logo.svg"
 }
