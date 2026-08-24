@@ -6,5 +6,6 @@
   "author": "AgentGate",
   "license": "MIT",
   "homepage": "https://github.com/richard7463/agent-gate",
-  "repository": "https://github.com/richard7463/agent-gate"
+  "repository": "https://github.com/richard7463/agent-gate",
+  "skills": "."
 }
