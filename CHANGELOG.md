@@ -2,6 +2,21 @@
 
 All notable changes to the AskGrokWallet plugin package are documented here.
 
+## Unreleased
+
+### Added
+
+- ERC-8196 alignment of the onchain rail: `IAIAgentAuthenticatedWallet`
+  (`registerPolicy` / `executeAction` / `revokePolicy` / `getPolicy`)
+- EIP-712 `AgentAction` signature verification bound to `policyHash`
+- Hash-chained audit trail covering signed actions and settled receipts,
+  with onchain `verifyAuditChain` integrity checks
+- ERC-8126 risk gating via `VerificationScoreRegistry` (EIP-712 signed
+  attestations from the verification provider)
+- BoundlessVault hard mode: fund movement requires a policy-compliant,
+  signed action proof (`executeTransferGuarded` / `executeProtocolCallGuarded`)
+- Entropy commit-reveal verification (`verifyEntropyReveal`)
+
 ## [0.1.0] - 2026-08-24
 
 ### Added
