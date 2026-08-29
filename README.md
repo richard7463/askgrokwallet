@@ -24,6 +24,17 @@ agent request -> policy (allow / ask / deny) -> execute or approve -> signed rec
 
 ---
 
+## Live onchain (Base mainnet)
+
+The governed-wallet contracts are deployed and verified on **Base** (chainId 8453):
+
+| Contract | Address | Explorer |
+| --- | --- | --- |
+| TrustLeaseController (ERC-8196) | `0x4ACcB1df8cc625AC05743888158CC3B866aC9833` | [BaseScan](https://basescan.org/address/0x4ACcB1df8cc625AC05743888158CC3B866aC9833) |
+| BoundlessVault | `0xd9526Eb615f5e252341b5a83b3c26eCca4f1284e` | [BaseScan](https://basescan.org/address/0xd9526Eb615f5e252341b5a83b3c26eCca4f1284e) |
+| VerificationScoreRegistry (ERC-8126) | `0x89c8B3d053a79A0bd5A47597aaF97729f504d359` | [BaseScan](https://basescan.org/address/0x89c8B3d053a79A0bd5A47597aaF97729f504d359) |
+| Mock USDC (demo) | `0x17058C78CFE90314dd349C7fAC71Bb4f0A8f0852` | [BaseScan](https://basescan.org/address/0x17058C78CFE90314dd349C7fAC71Bb4f0A8f0852) |
+
 ## Why
 
 Giving an agent a wallet is easy. Giving it a wallet with **rules** is not.

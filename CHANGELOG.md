@@ -6,6 +6,8 @@ All notable changes to the AskGrokWallet plugin package are documented here.
 
 ### Added
 
+- Deployed AskGrokWallet contracts to **Base mainnet** (chainId 8453):
+  TrustLeaseController, BoundlessVault, VerificationScoreRegistry, Mock USDC
 - ERC-8196 alignment of the onchain rail: `IAIAgentAuthenticatedWallet`
   (`registerPolicy` / `executeAction` / `revokePolicy` / `getPolicy`)
 - EIP-712 `AgentAction` signature verification bound to `policyHash`
