@@ -6,6 +6,8 @@ All notable changes to the AskGrokWallet plugin package are documented here.
 
 ### Added
 
+- Live site moved to Vercel: `https://askgrokwallet.vercel.app` (HTTPS),
+  with English pitch + developer-facing pitch-v2 + interactive demo
 - Deployed AskGrokWallet contracts to **Base mainnet** (chainId 8453):
   TrustLeaseController, BoundlessVault, VerificationScoreRegistry, Mock USDC
 - ERC-8196 alignment of the onchain rail: `IAIAgentAuthenticatedWallet`
