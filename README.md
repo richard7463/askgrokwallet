@@ -19,7 +19,7 @@ AI agents can think, trade, and pay. AskGrokWallet is the layer that decides wha
 agent request -> policy (allow / ask / deny) -> execute or approve -> signed receipt
 ```
 
-> **Live:** [AskGrokWallet site](https://askgrokwallet.vercel.app/pitch.html) · [interactive demo](https://askgrokwallet.vercel.app/demo) · [approval inbox](https://askgrokwallet.vercel.app/approvals) ·
+> **Live:** [AskGrokWallet site](https://askgrokwallet.io/pitch.html) · [interactive demo](https://askgrokwallet.io/demo) · [approval inbox](https://askgrokwallet.io/approvals) ·
 > **xAI marketplace PR:** [plugin-marketplace#341](https://github.com/xai-org/plugin-marketplace/pull/341)
 
 ---
