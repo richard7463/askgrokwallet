@@ -10,6 +10,7 @@
     <a href="https://img.shields.io/badge/for-Grok%20Bot-000000"><img src="https://img.shields.io/badge/for-Grok%20Bot-000000" alt="for Grok Bot"></a>
     <a href="https://img.shields.io/badge/PRs-welcome-10b981"><img src="https://img.shields.io/badge/PRs-welcome-10b981" alt="PRs welcome"></a>
     <a href="https://github.com/askgrokwallet/askgrokwallet/actions/workflows/ci.yml"><img src="https://github.com/askgrokwallet/askgrokwallet/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://skills.sh/askgrokwallet/askgrokwallet"><img src="https://skills.sh/b/askgrokwallet/askgrokwallet" alt="skills.sh"></a>
   </p>
 </div>
 
