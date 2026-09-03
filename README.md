@@ -66,6 +66,29 @@ mode delivers:
 gate). A watchdog still cannot stop the agent from exfiltrating a raw private
 key — key hygiene is a separate layer.
 
+### Action rules (consequential actions)
+
+Beyond amounts, the policy engine gates **action types**. Canonical phrasing:
+
+```text
+Ask me before cancel, downgrade, delete, or send.
+Never cancel without asking.
+Only allow payments to known billers.
+```
+
+Send the request with the matching `intentKind`:
+
+```text
+transfer · purchase · billPay · refund · trade ·
+cancel · downgrade · upgrade · delete · send · apply · update
+```
+
+Evaluation order is fixed: deny → ask → allow → default. Consequential kinds
+(cancel/downgrade/upgrade/delete/send/apply/update) with **no** explicit rule
+default to `ask` (fail-safe). Payment kinds still fall through to amount
+rules. Tested live: `intentKind: "downgrade"` → ask ("action type downgrade
+requires human approval"), `intentKind: "cancel"` under "never cancel" → deny.
+
 ### Tested (2026-09-03)
 
 - `advisory`: policy allow/ask/deny + receipts verified against the live host
