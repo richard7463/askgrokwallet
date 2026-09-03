@@ -199,8 +199,16 @@ result to `false`.
 
 - **Ephemeral store**: the hosted demo store is temporary (Vercel `/tmp`).
   Treat it as a sandbox; durable storage is on the roadmap.
-- **No execution rail yet**: approve/deny writes a signed receipt; it does not
-  move funds or execute the onchain action.
+- **Two execution layers — keep them straight**:
+  - Onchain guarded execution **works and is verified on a real testnet**
+    (Ethereum Sepolia, 2026-09-03): lease + operator + budget checks pass,
+    then BoundlessVault executes a guarded transfer and anchors the receipt
+    onchain (execution tx `0xbaf2c3…58e3`, anchor `0x1bd82e…628e`).
+    This rail runs through operator scripts, not through the hosted demo.
+  - The hosted approval inbox still ends at a signed receipt: approving a
+    request does **not yet auto-trigger** that onchain executor. The
+    approve→execute bridge code exists (settlement worker, dry-run) and live
+    wiring is the next milestone.
 - **Risk oracle**: the ERC-8126 gate currently uses a mock provider; wiring the
   real oracle (erc8126scan) is in progress.
 - **BaseScan verification**: contracts are deployed on Base mainnet; source
@@ -251,11 +259,13 @@ See [SECURITY.md](SECURITY.md) for the vulnerability disclosure policy.
 
 - ✅ Policy engine + approval inbox + receipts — tested end-to-end (local + hosted)
 - ✅ Boundless vault: lease, budgets, real transfers, onchain receipts — verified on a local chain, deployed to Base mainnet
+- ✅ Guarded onchain execution verified on Ethereum Sepolia (testnet, 2026-09-03) — operator-script rail
 - ✅ Marketplace packaging for Grok Build + Cursor
 - ✅ Deployed to Base mainnet (TrustLeaseController / BoundlessVault / VerificationScoreRegistry)
 - ⏳ Hosted persistent storage (KV/Blob)
 - ⏳ BaseScan source verification
 - ⏳ x402 payment rail
+- ⏳ Approval inbox → onchain executor auto-trigger (settlement bridge, dry-run done)
 
 ## Contributing
 
