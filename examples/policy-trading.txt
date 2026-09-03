@@ -1,0 +1,4 @@
+Small trades under $10 run automatically; over $10 ask me.
+Never trade pump-dump tokens or honeypots.
+Max drawdown $50 — once hit, stop and ask me.
+Daily loss limit $20 — pause auto-trading for the day and report.

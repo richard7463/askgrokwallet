@@ -42,8 +42,29 @@ agent request -> policy (allow / ask / deny) -> execute or approve -> proof
    ```
 
 2. The policy engine compiles this to structured rules:
-   - `autoBelowUsd`, `askAboveUsd`, `dailyBudgetUsd`, `denyKeywords`, `allowKeywords`
+   - `autoBelowUsd`, `askAboveUsd`, `dailyBudgetUsd`, `denyKeywords`,
+     `allowKeywords`, plus trading stops `maxDrawdownUsd` and
+     `maxDailyLossUsd`
 3. Every request is evaluated: `allow` / `ask` / `deny`.
+
+Trading-desk example (see `examples/policy-trading.txt`):
+
+```text
+small trades under $10 run automatically; over $10 ask me;
+never trade pump-dump tokens or honeypots;
+max drawdown $50; daily loss limit $20
+```
+
+Once drawdown or the daily loss limit is hit, **nothing auto-runs** — the
+operator decides, and every outcome still receipts.
+
+## Hosted API base URL
+
+The public demo host is **https://askgrokwallet.io**. If you run your own
+AskGrokWallet API, set `ASKWALLET_BASE_URL` (e.g. `http://localhost:3000`)
+and use it in place of the host below. The `/api/approvals` write endpoints
+need a bearer token when the host has one configured — the keyless `demo`
+rows are the only exception (`"source":"demo"`).
 
 ## Flow
 
@@ -67,6 +88,39 @@ agent request -> policy (allow / ask / deny) -> execute or approve -> proof
 4. **Prove**: approved and blocked outcomes both produce a receipt (who, what,
    how much, verdict, decision, timestamps).
 
+## Quickstart (curl, copy-paste)
+
+Evaluate a trading policy and create an approval the operator can decide:
+
+```bash
+curl -s https://askgrokwallet.io/api/approvals \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "source": "demo",
+    "requester": "trader-bot",
+    "summary": "swap 25 USDC for ETH on Uniswap",
+    "amountUsd": 25,
+    "target": "uniswap",
+    "policyText": "small trades under $10 run automatically; over $10 ask me; max drawdown $50; daily loss limit $20",
+    "drawdownUsd": 8,
+    "lossTodayUsd": 3
+  }'
+```
+
+An `ask` verdict returns the created approval with an `id`; approve it from
+the operator side (demo rows are keyless):
+
+```bash
+curl -s https://askgrokwallet.io/api/approvals/REPLACE_WITH_ID \
+  -X POST -H 'Content-Type: application/json' \
+  -d '{ "decision": "approve", "by": "operator" }'
+```
+
+To see the stop fire, resubmit the first curl with `"drawdownUsd": 60` — the
+verdict flips to `ask` with reason "auto-trading paused", even though $25 is
+over the ask threshold anyway; use `"amountUsd": 5` to prove a **small** trade
+is also paused once the stop is breached.
+
 ## Rules
 
 - Never invent policy, budgets, or allowlists — ask the operator.
@@ -78,8 +132,8 @@ agent request -> policy (allow / ask / deny) -> execute or approve -> proof
 
 | Purpose | Method + URL |
 | --- | --- |
-| Compile + evaluate policy | `POST /api/approvals` (with `policyText`) |
-| Create approval request | `POST /api/approvals` |
-| List approvals | `GET /api/approvals?status=pending` |
-| Decide approval | `POST /api/approvals/{id}` |
-| Approval inbox | `GET /approvals` (UI) |
+| Compile + evaluate policy | `POST https://askgrokwallet.io/api/approvals` (with `policyText`) |
+| Create approval request | `POST https://askgrokwallet.io/api/approvals` |
+| List approvals | `GET https://askgrokwallet.io/api/approvals?status=pending` |
+| Decide approval | `POST https://askgrokwallet.io/api/approvals/{id}` |
+| Approval inbox | `GET https://askgrokwallet.io/approvals` (UI) |
