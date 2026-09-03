@@ -35,6 +35,11 @@ The governed-wallet contracts are deployed and verified on **Base** (chainId 845
 | VerificationScoreRegistry (ERC-8126) | `0x89c8B3d053a79A0bd5A47597aaF97729f504d359` | [BaseScan](https://basescan.org/address/0x89c8B3d053a79A0bd5A47597aaF97729f504d359) |
 | Mock USDC (demo) | `0x17058C78CFE90314dd349C7fAC71Bb4f0A8f0852` | [BaseScan](https://basescan.org/address/0x17058C78CFE90314dd349C7fAC71Bb4f0A8f0852) |
 
+**Source code lives in this repo:** [`contracts/`](contracts/) — a Hardhat project
+with 19 passing tests (policy registry, EIP-712 signature verification,
+audit-chain tamper detection, risk gating, vault hard mode) that runs in CI.
+Deployment record: [`contracts/deployments/base-mainnet.json`](contracts/deployments/base-mainnet.json).
+
 ## Why
 
 Giving an agent a wallet is easy. Giving it a wallet with **rules** is not.

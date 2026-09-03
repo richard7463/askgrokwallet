@@ -32,3 +32,22 @@ jobs:
             echo "possible secret found"; exit 1
           fi
           echo "no obvious secrets"
+  contracts:
+    name: Contracts compile + test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: contracts/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Compile
+        run: npm run compile
+      - name: Test
+        run: npm test

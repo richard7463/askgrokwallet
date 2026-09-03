@@ -9,3 +9,6 @@ data/
 .hardhat-home/
 .hardhat-config/
 dist/
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/

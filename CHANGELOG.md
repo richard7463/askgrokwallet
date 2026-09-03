@@ -6,6 +6,9 @@ All notable changes to the AskGrokWallet plugin package are documented here.
 
 ### Added
 
+- Monorepo: Boundless / ERC-8196 onchain engine moved into `contracts/`
+  (Hardhat project with 19 tests + compile/test CI job, Base mainnet
+  deployment record, ERC-8196 alignment notes)
 - Live site: `https://askgrokwallet.io` (HTTPS, custom domain on Vercel),
   with English pitch + developer-facing pitch-v2 + interactive demo
 - Deployed AskGrokWallet contracts to **Base mainnet** (chainId 8453):

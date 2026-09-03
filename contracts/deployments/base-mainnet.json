@@ -1,0 +1,12 @@
+{
+  "network": "base",
+  "chainId": "8453",
+  "deployer": "0x5bCb572d7BeF71950C10882B44b9a19Eb3319327",
+  "controller": "0x4ACcB1df8cc625AC05743888158CC3B866aC9833",
+  "vault": "0xd9526Eb615f5e252341b5a83b3c26eCca4f1284e",
+  "mockUsdc": "0x17058C78CFE90314dd349C7fAC71Bb4f0A8f0852",
+  "riskOracle": "0x89c8B3d053a79A0bd5A47597aaF97729f504d359",
+  "consumerName": "bound-agent",
+  "operatorName": "human-principal",
+  "deployedAt": "2026-08-29T11:27:32.146Z"
+}
