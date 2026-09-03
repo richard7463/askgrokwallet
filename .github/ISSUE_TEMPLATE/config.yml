@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: AskGrokWallet site
+    url: https://askgrokwallet.io
+    about: Product site, pitch, and interactive demo
+  - name: xAI marketplace PR #341
+    url: https://github.com/xai-org/plugin-marketplace/pull/341
+    about: Plugin listing under review

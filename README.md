@@ -40,6 +40,13 @@ with 19 passing tests (policy registry, EIP-712 signature verification,
 audit-chain tamper detection, risk gating, vault hard mode) that runs in CI.
 Deployment record: [`contracts/deployments/base-mainnet.json`](contracts/deployments/base-mainnet.json).
 
+## Feedback (we read everything)
+
+This is experimental infrastructure. If you build with it, review it, or audit
+it, open a **[Developer feedback](https://github.com/askgrokwallet/askgrokwallet/issues/new?template=feedback.yml)**
+issue — install friction, policy/API design, ERC-8196 interface notes, security
+concerns. Hard criticism lands faster than praise.
+
 ## Why
 
 Giving an agent a wallet is easy. Giving it a wallet with **rules** is not.

@@ -1,0 +1,45 @@
+name: Developer feedback
+description: Real feedback from builders, reviewers, and security folks — install experience, API/contract design, ERC-8196 alignment, trust signals.
+title: "[feedback] "
+labels: [feedback]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying AskGrokWallet. We want hard feedback, not praise.
+        Answer the ones that apply to what you actually did.
+  - type: textarea
+    id: tried
+    attributes:
+      label: What did you try?
+      description: Plugin install / policy API / approval inbox / contracts (`contracts/`) / demo?
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: What surprised you or blocked you?
+      description: Docs gaps, confusing API, deployment friction, missing feature.
+    validations:
+      required: true
+  - type: textarea
+    id: standards
+    attributes:
+      label: ERC-8196 / ERC-8126 review notes
+      description: Interface decisions, audit trail design, risk-gate semantics, entropy handling — anything a spec reviewer would flag.
+  - type: textarea
+    id: trust
+    attributes:
+      label: What would make you trust it with real agent spend?
+      description: Audit, tests, proofs, docs, permissions model, examples.
+  - type: dropdown
+    id: woulduse
+    attributes:
+      label: Would you put an agent behind this wallet this quarter?
+      options:
+        - Yes, for real spend
+        - Yes, in a sandbox
+        - Not yet — needs changes
+        - No
+    validations:
+      required: true
