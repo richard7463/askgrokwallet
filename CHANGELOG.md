@@ -10,6 +10,9 @@ All notable changes to the AskGrokWallet plugin package are documented here.
   `CODE_OF_CONDUCT.md`, CodeQL analysis workflow, npm dependency updates for
   `contracts/`; README links now point inside this repository instead of the
   retired org profile repo
+- README: tested Grok Bot quickstart guide (policy examples incl. trading
+  stops, approval inbox, Ed25519 receipt verification, auth and boundary
+  notes — every claim run against the live host on 2026-09-03)
 - Monorepo: Boundless / ERC-8196 onchain engine moved into `contracts/`
   (Hardhat project with 19 tests + compile/test CI job, Base mainnet
   deployment record, ERC-8196 alignment notes)

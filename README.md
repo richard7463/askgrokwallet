@@ -88,59 +88,139 @@ human-in-the-loop middle ground the standard leaves open — *small things run,
 big things ask* — and every approval or denial is itself signed and anchored
 into the same tamper-evident chain.
 
-## Quickstart
+## Quickstart — use AskGrokWallet from a Grok Bot
 
-### Install the plugin
+> Every request in this guide was executed against the live host
+> (https://askgrokwallet.io) on 2026-09-03. Response shapes below are real,
+> abbreviated only for readability.
+
+### 0. Install the plugin (on your Grok host)
 
 ```bash
-# From GitHub (recommended — pinned SHA)
 grok plugin install richard7463/askgrokwallet --trust
-
-# Or from a local path during development
-grok plugin install ./integrations/grokbotwallet --trust
 ```
 
-After install, the `askgrokwallet` skill appears in `/skills`. Enable it for a Bot via Settings → Plugins.
+After install the `askgrokwallet` skill appears in `/skills`; enable it for a
+Bot via Settings → Plugins. Two honest caveats:
 
-### Define a policy
+- `grok plugin install` runs on a Grok host, so this repository cannot execute
+  it for you. The xAI in-app marketplace listing is [PR #341](https://github.com/xai-org/plugin-marketplace/pull/341) — until it merges, use the command above.
+- The hosted API is a **sandbox**: its store is ephemeral and there is no
+  execution rail yet (see [Boundaries](#boundaries-read-before-real-money)).
 
-Write plain English:
+### 1. Write a policy in plain English
+
+The engine compiles sentences into rules: `autoBelowUsd`, `askAboveUsd`,
+`dailyBudgetUsd`, `maxDrawdownUsd`, `maxDailyLossUsd`, `denyKeywords`,
+`allowKeywords`.
 
 ```text
+# Payments
 payments under $50 run automatically; over $50 ask me;
 never pay blacklisted merchants; daily budget $200
+
+# Trading (see examples/policy-trading.txt)
+trades under $10 run automatically; over $10 ask me;
+max drawdown $50; daily loss limit $20; never trade pump-dump tokens
 ```
 
-### Watch the loop
+### 2. Evaluate every money move
 
-1. **Evaluate** — the policy engine returns `allow`, `ask`, or `deny`
-2. **Ask** — `ask` requests create an approval:
+Send the action to the policy engine before you execute anything:
 
-   ```text
-   POST /api/approvals
-   { summary, amountUsd, requester, target, policyText }
-   ```
+```bash
+curl -s https://askgrokwallet.io/api/approvals \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "source": "demo",
+    "requester": "my-trading-bot",
+    "summary": "swap 5 USDC for ETH",
+    "amountUsd": 5,
+    "target": "uniswap",
+    "policyText": "trades under $10 run automatically; over $10 ask me; max drawdown $50; daily loss limit $20; never trade pump-dump tokens",
+    "drawdownUsd": 3,
+    "lossTodayUsd": 1
+  }'
+```
 
-3. **Decide** — approve or deny from the inbox:
+The three verdicts, all tested live:
 
-   ```text
-   POST /api/approvals/{id}
-   { decision: "approve" | "deny", by: "operator" }
-   ```
+| Situation | Observed result |
+| --- | --- |
+| $5 swap, no risk breach | `allow` → auto-allowed receipt, Ed25519 v2 signature |
+| $25 swap (over the $10 line) | `ask` → pending approval created (`id` returned) |
+| $5 swap but drawdown $60 ≥ $50 | `ask` → reason: "auto-trading paused" |
+| Buying a pump-dump token | `deny` → denied receipt with reason |
 
-4. **Prove** — approved and blocked outcomes both produce a receipt.
+`source: "demo"` is the keyless demo identity. Any other `source` requires a
+bearer token:
+
+```bash
+curl -s https://askgrokwallet.io/api/approvals \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer YOUR_TOKEN' \
+  -d '{ ... "source": "grok", ... }'
+```
+
+Unauthenticated non-demo writes are rejected with `401` (tested).
+
+### 3. Decide from the approval inbox
+
+An `ask` request lands in the inbox at https://askgrokwallet.io/approvals
+(and in `GET /api/approvals?status=pending`). Approve or deny by id:
+
+```bash
+curl -s -X POST https://askgrokwallet.io/api/approvals/APPROVAL_ID \
+  -H 'Content-Type: application/json' \
+  -d '{ "decision": "approve", "by": "operator@demo" }'
+```
+
+The receipt comes back `status: "approved"` with an Ed25519 signature.
+
+### 4. Verify any receipt — no shared secret
+
+Receipts are signed with Ed25519. Anyone can verify a receipt row against the
+published public key:
+
+```bash
+curl -s https://askgrokwallet.io/api/receipt-public-key
+# { "alg": "ED25519", "publicKey": "MCow..." }
+
+curl -s -X POST https://askgrokwallet.io/api/receipts/verify \
+  -H 'Content-Type: application/json' \
+  -d 'PASTE_THE_RECEIPT_JSON_HERE'
+# { "verified": true }
+```
+
+Changing the amount, target, verdict, or decision after signing flips the
+result to `false`.
+
+### Boundaries (read before real money)
+
+- **Ephemeral store**: the hosted demo store is temporary (Vercel `/tmp`).
+  Treat it as a sandbox; durable storage is on the roadmap.
+- **No execution rail yet**: approve/deny writes a signed receipt; it does not
+  move funds or execute the onchain action.
+- **Risk oracle**: the ERC-8126 gate currently uses a mock provider; wiring the
+  real oracle (erc8126scan) is in progress.
+- **BaseScan verification**: contracts are deployed on Base mainnet; source
+  verification on BaseScan is pending (canonical source is `contracts/` here).
 
 ## API reference
 
 | Purpose | Method + URL |
 | --- | --- |
-| Compile + evaluate policy | `POST /api/approvals` (with `policyText`) |
-| Create approval request | `POST /api/approvals` |
-| List approvals | `GET /api/approvals?status=pending` |
-| Decide approval | `POST /api/approvals/{id}` |
-| Approval inbox (UI) | `GET /approvals` |
+| Compile + evaluate policy | `POST https://askgrokwallet.io/api/approvals` (with `policyText`) |
+| Create approval request | `POST https://askgrokwallet.io/api/approvals` |
+| List approvals | `GET https://askgrokwallet.io/api/approvals?status=pending` |
+| Decide approval | `POST https://askgrokwallet.io/api/approvals/{id}` |
+| Approval inbox (UI) | `GET https://askgrokwallet.io/approvals` |
+| Public receipt key | `GET https://askgrokwallet.io/api/receipt-public-key` |
+| Verify a receipt | `POST https://askgrokwallet.io/api/receipts/verify` |
 
-Write endpoints require a bearer token when `ASKWALLET_API_TOKEN` is configured.
+Write endpoints require `Authorization: Bearer <token>` unless the body uses
+`"source": "demo"` (the keyless demo identity). The hosted demo enforces this
+with `401` responses (tested 2026-09-03).
 
 ## Architecture
 
