@@ -2,6 +2,7 @@
   <img src="assets/logo.svg" width="140" alt="AskGrokWallet">
   <h1>AskGrokWallet</h1>
   <p><strong>A governed wallet for Grok agents.</strong><br>Small things run. Big things ask. Everything receipts.</p>
+  <p><strong>Implements ERC-8196 (AI Agent Authenticated Wallet)</strong> — deployed on Base mainnet.</p>
   <p><em>agents run · humans rule · proof settles</em></p>
   <p>
     <a href="https://img.shields.io/badge/license-MIT-4f46e5"><img src="https://img.shields.io/badge/license-MIT-4f46e5" alt="MIT"></a>
@@ -27,7 +28,10 @@ agent request -> policy (allow / ask / deny) -> execute or approve -> signed rec
 
 ## Live onchain (Base mainnet)
 
-The governed-wallet contracts are deployed and verified on **Base** (chainId 8453):
+The governed-wallet contracts are deployed on **Base mainnet** (chainId 8453).
+Source-verification on BaseScan is in progress; until then, the canonical source
+is this repo's [`contracts/`](contracts/) directory (Hardhat project, CI runs
+the 19-test suite on every push):
 
 | Contract | Address | Explorer |
 | --- | --- | --- |
@@ -36,9 +40,6 @@ The governed-wallet contracts are deployed and verified on **Base** (chainId 845
 | VerificationScoreRegistry (ERC-8126) | `0x89c8B3d053a79A0bd5A47597aaF97729f504d359` | [BaseScan](https://basescan.org/address/0x89c8B3d053a79A0bd5A47597aaF97729f504d359) |
 | Mock USDC (demo) | `0x17058C78CFE90314dd349C7fAC71Bb4f0A8f0852` | [BaseScan](https://basescan.org/address/0x17058C78CFE90314dd349C7fAC71Bb4f0A8f0852) |
 
-**Source code lives in this repo:** [`contracts/`](contracts/) — a Hardhat project
-with 19 passing tests (policy registry, EIP-712 signature verification,
-audit-chain tamper detection, risk gating, vault hard mode) that runs in CI.
 Deployment record: [`contracts/deployments/base-mainnet.json`](contracts/deployments/base-mainnet.json).
 
 ## Feedback (we read everything)
