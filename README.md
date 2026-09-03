@@ -50,6 +50,34 @@ it, open a **[Developer feedback](https://github.com/richard7463/askgrokwallet/i
 issue — install friction, policy/API design, ERC-8196 interface notes, security
 concerns. Hard criticism lands faster than praise.
 
+## Choose your mode
+
+AskGrokWallet protects money at **different trust boundaries**. Pick the mode
+that matches how the agent holds its wallet — and never claim more than the
+mode delivers:
+
+| Mode | Who holds the keys | What AskGrokWallet enforces | Try it |
+| --- | --- | --- | --- |
+| `advisory` | The agent (EOA, keys local) | Policy advice + signed receipts only. It **cannot** stop a direct chain signature — that is impossible for any third party with an EOA. | Current hosted demo flow |
+| `guarded` | BoundlessVault contract | Everything onchain: policy, budget, drawdown, allowlist. Out-of-rule actions **revert** before funds move. Agent has no naked key. | Sepolia-verified rail (below) |
+| `watchdog` | The agent, on its host | A signing gate: `sendTransaction` first asks AskGrokWallet — `allow` signs, `ask` waits for a human, `deny` never signs. | `guarded-signer/` package |
+
+`advisory` and `watchdog` can be combined with `guarded` (host gate + vault
+gate). A watchdog still cannot stop the agent from exfiltrating a raw private
+key — key hygiene is a separate layer.
+
+### Tested (2026-09-03)
+
+- `advisory`: policy allow/ask/deny + receipts verified against the live host
+  (auth 401/201, Ed25519 receipt verification `{"verified":true}`).
+- `guarded`: real Ethereum Sepolia execution — lease + operator + budget
+  checks → vault guarded transfer → onchain receipt anchor. Also end-to-end
+  approve → settlement worker → vault transfer (tx `0xbf5a6f…dfee`,
+  `0x763cea…0b0b`) with receipts verified `true`.
+- `watchdog`: `guarded-signer` unit tests (allow signs / ask waits with id /
+  deny never signs / execute-after-approve) — 4/4 passing. A real Grok-host
+  install is not verifiable from this repository.
+
 ## Why
 
 Giving an agent a wallet is easy. Giving it a wallet with **rules** is not.
