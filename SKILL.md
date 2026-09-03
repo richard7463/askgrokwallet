@@ -6,7 +6,7 @@ description: >
   consequential actions move. Use when an agent wants to pay, trade, refund,
   or execute and a human-defined policy must decide allow / ask / deny.
 version: 0.1.0
-homepage: https://github.com/askgrokwallet/askgrokwallet
+homepage: https://github.com/richard7463/askgrokwallet
 metadata:
   emoji: 🔐
   category: governance

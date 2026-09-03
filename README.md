@@ -9,8 +9,8 @@
     <a href="https://img.shields.io/badge/status-experimental-f59e0b"><img src="https://img.shields.io/badge/status-experimental-f59e0b" alt="status: experimental"></a>
     <a href="https://img.shields.io/badge/for-Grok%20Bot-000000"><img src="https://img.shields.io/badge/for-Grok%20Bot-000000" alt="for Grok Bot"></a>
     <a href="https://img.shields.io/badge/PRs-welcome-10b981"><img src="https://img.shields.io/badge/PRs-welcome-10b981" alt="PRs welcome"></a>
-    <a href="https://github.com/askgrokwallet/askgrokwallet/actions/workflows/ci.yml"><img src="https://github.com/askgrokwallet/askgrokwallet/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-    <a href="https://skills.sh/askgrokwallet/askgrokwallet"><img src="https://skills.sh/b/askgrokwallet/askgrokwallet" alt="skills.sh"></a>
+    <a href="https://github.com/richard7463/askgrokwallet/actions/workflows/ci.yml"><img src="https://github.com/richard7463/askgrokwallet/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://skills.sh/richard7463/askgrokwallet"><img src="https://skills.sh/b/richard7463/askgrokwallet" alt="skills.sh"></a>
   </p>
 </div>
 
@@ -44,7 +44,7 @@ Deployment record: [`contracts/deployments/base-mainnet.json`](contracts/deploym
 ## Feedback (we read everything)
 
 This is experimental infrastructure. If you build with it, review it, or audit
-it, open a **[Developer feedback](https://github.com/askgrokwallet/askgrokwallet/issues/new?template=feedback.yml)**
+it, open a **[Developer feedback](https://github.com/richard7463/askgrokwallet/issues/new?template=feedback.yml)**
 issue — install friction, policy/API design, ERC-8196 interface notes, security
 concerns. Hard criticism lands faster than praise.
 
@@ -92,7 +92,7 @@ into the same tamper-evident chain.
 
 ```bash
 # From GitHub (recommended — pinned SHA)
-grok plugin install askgrokwallet/askgrokwallet --trust
+grok plugin install richard7463/askgrokwallet --trust
 
 # Or from a local path during development
 grok plugin install ./integrations/grokbotwallet --trust

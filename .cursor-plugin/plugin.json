@@ -5,8 +5,8 @@
   "description": "A governed wallet for Grok agents (and any AI agent): plain-English policies, a human approval inbox, and signed receipts for every spend.",
   "author": "AskGrokWallet",
   "license": "MIT",
-  "homepage": "https://github.com/askgrokwallet/askgrokwallet",
-  "repository": "https://github.com/askgrokwallet/askgrokwallet",
+  "homepage": "https://github.com/richard7463/askgrokwallet",
+  "repository": "https://github.com/richard7463/askgrokwallet",
   "skills": ".",
   "logo": "assets/logo.svg"
 }
