@@ -70,10 +70,10 @@ key — key hygiene is a separate layer.
 
 - `advisory`: policy allow/ask/deny + receipts verified against the live host
   (auth 401/201, Ed25519 receipt verification `{"verified":true}`).
-- `guarded`: real Ethereum Sepolia execution — lease + operator + budget
-  checks → vault guarded transfer → onchain receipt anchor. Also end-to-end
-  approve → settlement worker → vault transfer (tx `0xbf5a6f…dfee`,
-  `0x763cea…0b0b`) with receipts verified `true`.
+- `guarded`: real Ethereum Sepolia execution, **hosted end-to-end** — approve
+  an `execute` intent on askgrokwallet.io → Jakarta settlement worker → vault
+  transfer (tx `0xefea03f8…4771`, plus earlier `0xbf5a6f…dfee` /
+  `0x763cea…0b0b`) → receipt `verified:true`.
 - `watchdog`: `guarded-signer` unit tests (allow signs / ask waits with id /
   deny never signs / execute-after-approve) — 4/4 passing. A real Grok-host
   install is not verifiable from this repository.
@@ -225,18 +225,17 @@ result to `false`.
 
 ### Boundaries (read before real money)
 
-- **Ephemeral store**: the hosted demo store is temporary (Vercel `/tmp`).
-  Treat it as a sandbox; durable storage is on the roadmap.
+- **Persistent store**: the hosted backend now stores approvals in Postgres on
+  the Jakarta server (not ephemeral). Demo rows persist.
 - **Two execution layers — keep them straight**:
   - Onchain guarded execution **works and is verified on a real testnet**
     (Ethereum Sepolia, 2026-09-03): lease + operator + budget checks pass,
     then BoundlessVault executes a guarded transfer and anchors the receipt
     onchain (execution tx `0xbaf2c3…58e3`, anchor `0x1bd82e…628e`).
-    This rail runs through operator scripts, not through the hosted demo.
-  - The hosted approval inbox still ends at a signed receipt: approving a
-    request does **not yet auto-trigger** that onchain executor. The
-    approve→execute bridge code exists (settlement worker, dry-run) and live
-    wiring is the next milestone.
+  - The hosted approval inbox **auto-triggers** the executor: an approved
+    request with an `execute` intent is settled by the Jakarta worker on
+    Ethereum Sepolia (e2e tx `0xefea03f8…4771`, receipt `verified:true`).
+    Mainnet guarded execution still needs a funded mainnet vault.
 - **Risk oracle**: the ERC-8126 gate currently uses a mock provider; wiring the
   real oracle (erc8126scan) is in progress.
 - **BaseScan verification**: contracts are deployed on Base mainnet; source
@@ -287,13 +286,13 @@ See [SECURITY.md](SECURITY.md) for the vulnerability disclosure policy.
 
 - ✅ Policy engine + approval inbox + receipts — tested end-to-end (local + hosted)
 - ✅ Boundless vault: lease, budgets, real transfers, onchain receipts — verified on a local chain, deployed to Base mainnet
-- ✅ Guarded onchain execution verified on Ethereum Sepolia (testnet, 2026-09-03) — operator-script rail
+- ✅ Guarded onchain execution verified on Ethereum Sepolia (testnet, 2026-09-03) — operator-script rail + **hosted approve→execute auto-trigger (Jakarta worker)**
 - ✅ Marketplace packaging for Grok Build + Cursor
 - ✅ Deployed to Base mainnet (TrustLeaseController / BoundlessVault / VerificationScoreRegistry)
-- ⏳ Hosted persistent storage (KV/Blob)
+- ✅ Hosted persistent storage (Postgres 15 on the Jakarta server)
 - ⏳ BaseScan source verification
 - ⏳ x402 payment rail
-- ⏳ Approval inbox → onchain executor auto-trigger (settlement bridge, dry-run done)
+- ✅ Approval inbox → onchain executor auto-trigger (live on Sepolia; mainnet pending vault funding)
 
 ## Contributing
 
