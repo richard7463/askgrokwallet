@@ -11,6 +11,7 @@
     <a href="https://img.shields.io/badge/for-Grok%20Bot-000000"><img src="https://img.shields.io/badge/for-Grok%20Bot-000000" alt="for Grok Bot"></a>
     <a href="https://img.shields.io/badge/PRs-welcome-10b981"><img src="https://img.shields.io/badge/PRs-welcome-10b981" alt="PRs welcome"></a>
     <a href="https://github.com/richard7463/askgrokwallet/actions/workflows/ci.yml"><img src="https://github.com/richard7463/askgrokwallet/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://github.com/richard7463/askgrokwallet/actions/workflows/codeql.yml"><img src="https://github.com/richard7463/askgrokwallet/actions/workflows/codeql.yml/badge.svg" alt="CodeQL"></a>
     <a href="https://skills.sh/richard7463/askgrokwallet"><img src="https://skills.sh/b/richard7463/askgrokwallet" alt="skills.sh"></a>
   </p>
 </div>
@@ -164,20 +165,23 @@ The policy engine compiles plain-English rules into a structured policy (`autoBe
 - Receipts record who, what, how much, verdict, decision, and timestamps
 - Marketplace packaging contains no `curl | bash`, remote code download/exec, or credential exfiltration patterns
 
-See [SECURITY.md](https://github.com/askgrokwallet/.github/blob/main/SECURITY.md) for the vulnerability disclosure policy.
+See [SECURITY.md](SECURITY.md) for the vulnerability disclosure policy.
 
 ## Status & roadmap
 
 - ✅ Policy engine + approval inbox + receipts — tested end-to-end (local + hosted)
-- ✅ Boundless vault: lease, budgets, real transfers, onchain receipts — verified on a local chain
+- ✅ Boundless vault: lease, budgets, real transfers, onchain receipts — verified on a local chain, deployed to Base mainnet
 - ✅ Marketplace packaging for Grok Build + Cursor
+- ✅ Deployed to Base mainnet (TrustLeaseController / BoundlessVault / VerificationScoreRegistry)
 - ⏳ Hosted persistent storage (KV/Blob)
-- ⏳ Testnet / mainnet deployment
+- ⏳ BaseScan source verification
 - ⏳ x402 payment rail
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/askgrokwallet/.github/blob/main/CONTRIBUTING.md). One logical change per PR, keep the diff minimal, no secrets.
+See [CONTRIBUTING.md](CONTRIBUTING.md). One logical change per PR, keep the
+diff minimal, no secrets. All community spaces follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 

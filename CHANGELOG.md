@@ -6,6 +6,10 @@ All notable changes to the AskGrokWallet plugin package are documented here.
 
 ### Added
 
+- Repository hygiene: `SECURITY.md`, `CONTRIBUTING.md`,
+  `CODE_OF_CONDUCT.md`, CodeQL analysis workflow, npm dependency updates for
+  `contracts/`; README links now point inside this repository instead of the
+  retired org profile repo
 - Monorepo: Boundless / ERC-8196 onchain engine moved into `contracts/`
   (Hardhat project with 19 tests + compile/test CI job, Base mainnet
   deployment record, ERC-8196 alignment notes)
