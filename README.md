@@ -60,7 +60,7 @@ mode delivers:
 | --- | --- | --- | --- |
 | `advisory` | The agent (EOA, keys local) | Policy advice + signed receipts only. It **cannot** stop a direct chain signature — that is impossible for any third party with an EOA. | Current hosted demo flow |
 | `guarded` | BoundlessVault contract | Everything onchain: policy, budget, drawdown, allowlist. Out-of-rule actions **revert** before funds move. Agent has no naked key. | Sepolia-verified rail (below) |
-| `watchdog` | The agent, on its host | A signing gate: `sendTransaction` first asks AskGrokWallet — `allow` signs, `ask` waits for a human, `deny` never signs. | `guarded-signer/` package |
+| `watchdog` | The agent, on its host | A signing gate: `sendTransaction` first asks AskGrokWallet — `allow` signs, `ask` waits for a human, `deny` never signs. Action types (cancel/downgrade/delete/…) pass through the same gate before signing. | `guarded-signer/` package |
 
 `advisory` and `watchdog` can be combined with `guarded` (host gate + vault
 gate). A watchdog still cannot stop the agent from exfiltrating a raw private
