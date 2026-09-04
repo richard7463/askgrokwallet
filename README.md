@@ -137,6 +137,13 @@ The onchain rail implements [ERC-8196 — AI Agent Authenticated Wallet](https:/
 - **EIP-712 `AgentAction` signatures** — the agent signs every action, bound to its `policyHash`; the owner's private key never leaves the owner
 - **Hash-chained audit trail** — every signed action and every settled receipt links to the previous entry; `verifyAuditChain` detects any tampering
 - **ERC-8126 risk gate** — a `VerificationScoreRegistry` accepts EIP-712 signed attestations from the verification provider; execution rejects agents whose current risk score exceeds the policy's `minVerificationScore`
+
+Semantics confirmed by the ERC-8196 authors in the official discussion thread
+(2026-09-04): `minVerificationScore` is a ceiling — reject when the ERC-8126
+score *exceeds* the policy value (lower is safer) — and `executeAction`
+performs no second ERC-8004 identity-registry lookup; the only identity/risk
+hook is the ERC-8126 score lookup by `policy.agentId`. Our implementation
+follows both readings.
 - **Entropy commit-reveal** — action signatures carry an entropy commitment, with onchain reveal verification
 - **Active containment** — revoke a policy or pause the operator; authority dies instantly
 
