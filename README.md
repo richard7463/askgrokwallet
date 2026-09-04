@@ -89,6 +89,12 @@ default to `ask` (fail-safe). Payment kinds still fall through to amount
 rules. Tested live: `intentKind: "downgrade"` → ask ("action type downgrade
 requires human approval"), `intentKind: "cancel"` under "never cancel" → deny.
 
+After a human approves a consequential action, the API returns an
+**agent-steps** plan (contact the provider, confirm, record) for the host
+agent to execute — AskGrokWallet does not pretend the action completed on its
+own. Onchain-capable kinds (transfer) have no agent steps; they go through
+the guarded executor.
+
 ### Tested (2026-09-03)
 
 - `advisory`: policy allow/ask/deny + receipts verified against the live host
