@@ -249,7 +249,7 @@ dependencies, and it re-implements the checks from the published spec instead of
 importing our code.
 
 ```bash
-curl -O https://askgrokwallet.io/verify-receipt.mjs
+curl -O https://raw.githubusercontent.com/richard7463/askgrokwallet/main/spec/verify-receipt.mjs
 node verify-receipt.mjs receipt.json
 ```
 
