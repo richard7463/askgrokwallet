@@ -18,13 +18,17 @@ rewrite the log; after it, we cannot.
 ## Quick start
 
 ```bash
-curl -O https://askgrokwallet.io/verify-receipt.mjs
+curl -O https://raw.githubusercontent.com/richard7463/askgrokwallet/main/spec/verify-receipt.mjs
 node verify-receipt.mjs receipt.json
 ```
 
 Zero dependencies, one file, nothing to install. It re-implements the checks below
 from this spec rather than importing ours — a verifier that runs the issuer's code
 is not a verifier. Add `--offline` to check the signature with no network at all.
+
+The same file is mirrored at `https://askgrokwallet.io/verify-receipt.mjs`; fetch it
+from this repo if you would rather not take it from the host that also serves the
+receipts.
 
 | flag | effect |
 |---|---|
