@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://askgrokwallet.io/receipt-v3.schema.json",
+  "title": "AskGrokWallet receipt, signature version 3",
+  "description": "A receipt is an approval row plus an Ed25519 signature over 22 of its fields. This schema describes the shape; it cannot describe the signature, so passing validation says nothing about authenticity. To check that, run https://askgrokwallet.io/verify-receipt.mjs — a single dependency-free file that re-implements the check from the spec rather than importing the issuer's code. Two rules matter more than any type here: (1) the 22 signed fields are canonicalized in the FIXED order given by x-signedFields, not alphabetically, and a missing, undefined or null value is written as null rather than omitted, so absent and null are indistinguishable to the signature; (2) nested objects are canonicalized with their keys SORTED, so two key orders of the same execute intent cannot yield two valid signatures. canonical = \"v3:\" + JSON.stringify(that object).",
+  "type": "object",
+  "x-signedFields": [
+    "id", "summary", "amountUsd", "requester", "target", "policyId", "source", "mode", "intentKind",
+    "verdict", "reason", "status", "decision", "decidedBy",
+    "execute", "rail", "railRef", "txHash", "executionError",
+    "createdAt", "decidedAt", "settledAt"
+  ],
+  "x-unsignedFields": {
+    "signature": "the output — cannot cover itself",
+    "sigAlg": "output",
+    "sigVersion": "output. Deliberately NOT read when verifying: the version is fixed at 3 by the verifier, because a receipt that picks its own canonicalization could pick an easier one",
+    "signedAt": "output. Participates in the hash-chain entry preimage as a string, but is not inside the signature",
+    "settlementClaimedAt": "deliberately unsigned. The sweeper sets it to claim a row before executing, so it changes AFTER the receipt is signed; putting it in the signature would force a re-sign and a new chain entry for an event that moved no money",
+    "riskLevel": "there is no such field. Risk pre-check output rides inside the signed `reason` text on purpose — a 23rd signed field would make this sigVersion 4 and invalidate every receipt already issued"
+  },
+  "required": ["id", "summary", "amountUsd", "requester", "verdict", "status", "createdAt", "signature", "sigAlg", "sigVersion", "signedAt"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Also the requestId the controller consumes on-chain, which is why the same receipt cannot pay twice.",
+      "examples": ["appr_0fec3f4a0140"]
+    },
+    "summary": {
+      "type": "string",
+      "description": "Free text from the caller. Length-prefixed in the chain preimage precisely because it is attacker-controlled."
+    },
+    "amountUsd": {
+      "type": "number",
+      "description": "Use an integer or at most two decimals. JSON.stringify writes 80, never 80.0, and a value large or small enough to be written in exponential form will not round-trip across implementations."
+    },
+    "requester": { "type": "string", "description": "The agent that asked." },
+    "target": { "type": ["string", "null"], "description": "A merchant label, NOT a payee address. The address is execute.to." },
+    "policyId": { "type": ["string", "null"] },
+    "source": { "type": ["string", "null"], "examples": ["demo", "watchdog", "api"] },
+    "mode": {
+      "type": ["string", "null"],
+      "enum": ["advisory", "guarded", "watchdog", null],
+      "description": "Which trust boundary was in force. advisory and watchdog cannot stop a direct chain signature; only guarded reverts on-chain."
+    },
+    "intentKind": { "type": ["string", "null"], "description": "Present for consequential non-payment actions (cancel, downgrade, delete)." },
+    "verdict": { "type": ["string", "null"], "enum": ["allow", "ask", "deny", null], "description": "What the policy engine decided before any human saw it." },
+    "reason": { "type": ["string", "null"], "description": "Human-readable justification. Risk pre-check output appears here — see x-unsignedFields.riskLevel." },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "auto-allowed", "approved", "denied", "executed", "execution_failed"],
+      "description": "Read auto-allowed carefully: the policy allowed it and NO human was asked. Only `pending` ever waited for a person. `executed` and `execution_failed` are set by the sweeper after the chain answers."
+    },
+    "decision": { "type": ["string", "null"], "enum": ["auto", "approve", "deny", null], "description": "`auto` means the policy engine decided; there was no human decision to record." },
+    "decidedBy": { "type": ["string", "null"], "examples": ["policy-engine", "operator@console"] },
+    "execute": {
+      "type": ["object", "null"],
+      "description": "The payment intent. Exactly these four keys are kept; anything else the caller sends is dropped BEFORE signing, so the intent means one thing. If all four are absent the whole object is null.",
+      "additionalProperties": false,
+      "properties": {
+        "to": { "type": "string", "description": "The payee address." },
+        "asset": { "type": "string", "examples": ["USDC"] },
+        "chainId": { "type": ["integer", "string"] },
+        "amountUsd": { "type": "number" }
+      }
+    },
+    "rail": {
+      "type": ["string", "null"],
+      "description": "evm:<chainId> when derived from execute. A web2 rail such as stripe:subscription only WITNESSES a charge and cannot block one — do not read it as enforcement.",
+      "examples": ["evm:11155111", "evm:8453"]
+    },
+    "railRef": { "type": ["string", "null"], "description": "The rail's own identifier for a non-EVM payment." },
+    "txHash": { "type": ["string", "null"], "description": "Set when the sweeper executes. Signed since v3: under v2 it was outside the signature, so a receipt still verified after its destination and hash were swapped." },
+    "executionError": { "type": ["string", "null"] },
+    "createdAt": { "type": "string" },
+    "decidedAt": { "type": ["string", "null"] },
+    "settledAt": { "type": ["string", "null"] },
+    "signature": { "type": "string", "contentEncoding": "base64", "description": "Ed25519 over the UTF-8 bytes of the canonical string." },
+    "sigAlg": { "const": "ED25519" },
+    "sigVersion": { "const": 3, "description": "Only 3 verifies. v1 read its version off the untrusted row and had a hardcoded fallback secret; v2 signed 13 fields and left the destination out. Older rows read as unverified, which is the honest answer." },
+    "signedAt": { "type": "string" },
+    "settlementClaimedAt": { "type": ["string", "null"] }
+  }
+}
