@@ -211,7 +211,7 @@ The three verdicts, all tested live:
 
 | Situation | Observed result |
 | --- | --- |
-| $5 swap, no risk breach | `allow` → auto-allowed receipt, Ed25519 v2 signature |
+| $5 swap, no risk breach | `allow` → auto-allowed receipt, Ed25519 v3 signature |
 | $25 swap (over the $10 line) | `ask` → pending approval created (`id` returned) |
 | $5 swap but drawdown $60 ≥ $50 | `ask` → reason: "auto-trading paused" |
 | Buying a pump-dump token | `deny` → denied receipt with reason |
@@ -241,23 +241,47 @@ curl -s -X POST https://askgrokwallet.io/api/approvals/APPROVAL_ID \
 
 The receipt comes back `status: "approved"` with an Ed25519 signature.
 
-### 4. Verify any receipt — no shared secret
+### 4. Verify any receipt — without trusting us
 
-Receipts are signed with Ed25519. Anyone can verify a receipt row against the
-published public key:
+Receipts are signed with Ed25519 over 22 of their fields, including where the money
+went. The strong way to check one is the standalone verifier: one file, no
+dependencies, and it re-implements the checks from the published spec instead of
+importing our code.
 
 ```bash
-curl -s https://askgrokwallet.io/api/receipt-public-key
-# { "alg": "ED25519", "publicKey": "MCow..." }
+curl -O https://askgrokwallet.io/verify-receipt.mjs
+node verify-receipt.mjs receipt.json
+```
 
+Four lines come back — signature, chain, onchain, verdict — each marked `✓` (proven),
+`✗` (provably wrong) or `~` (not checked). `✗` and `~` are never mixed: a false alarm
+on a good receipt costs as much as a missed forgery, so `~` narrows what the verdict
+covers instead of withdrawing it.
+
+The three checks rest on different things: the **signature** is fully offline (add
+`--offline`) and covers all 22 fields including the payee address and tx hash; the
+**chain** places this receipt's signing event at a fixed position in an append-only
+log, linked hash by hash back to entry 1; **onchain** finds that log's head inside a
+public blockchain transaction. Only the third needs no trust in us at all.
+
+- Full specification: [`spec/receipt-v3.md`](spec/receipt-v3.md) — enough to write your
+  own verifier, including what the public log deliberately withholds and the hole that
+  leaves
+- Field types: [`spec/receipt-v3.schema.json`](spec/receipt-v3.schema.json)
+  (JSON Schema draft 2020-12)
+
+There is also an endpoint that verifies a receipt for you — weaker, because you are
+asking the issuer whether the issuer's own receipt is good:
+
+```bash
 curl -s -X POST https://askgrokwallet.io/api/receipts/verify \
   -H 'Content-Type: application/json' \
   -d 'PASTE_THE_RECEIPT_JSON_HERE'
 # { "verified": true }
 ```
 
-Changing the amount, target, verdict, or decision after signing flips the
-result to `false`.
+Changing the amount, target, payee address, verdict, decision, or tx hash after
+signing flips the result to `false`.
 
 ### Boundaries (read before real money)
 
