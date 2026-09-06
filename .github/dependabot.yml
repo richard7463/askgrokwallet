@@ -1,3 +1,9 @@
+# Dependabot for the workflow actions and the contracts package.
+#
+# The three ignores below are not "we do not want updates". Each one was tried
+# on a clean install and each one broke the build; the reason is recorded so the
+# next person does not have to rediscover it, and so a future migration can lift
+# the ignore deliberately instead of by accident.
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -9,3 +15,22 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    ignore:
+      # hardhat-toolbox 7.0.0 is a tombstone: no deps, no peers, and an index.js
+      # that prints "does not work with Hardhat 2 nor 3" and exits 1. The
+      # Hardhat 2 line lives on the `hh2` tag, which is the 6.x series we track.
+      # See PR #6.
+      - dependency-name: "@nomicfoundation/hardhat-toolbox"
+        update-types: ["version-update:semver-major"]
+      # Hardhat 3 needs the package converted to ESM, the toolbox replaced with
+      # hand-picked plugins, and the specs moved off the injected hre.ethers.
+      # Deferred until after the external audit and the mainnet deploy, so the
+      # auditor reads the toolchain that produced the deployed bytecode.
+      # See PR #3.
+      - dependency-name: "hardhat"
+        update-types: ["version-update:semver-major"]
+      # TypeScript 7 does not expose ts.sys, so ts-node cannot read a tsconfig
+      # and nothing loads under Hardhat 2. Unblocked by the Hardhat 3 migration,
+      # which compiles TypeScript itself. See PR #4.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
