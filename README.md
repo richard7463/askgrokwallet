@@ -264,6 +264,8 @@ The three checks rest on different things: the **signature** is fully offline (a
 log, linked hash by hash back to entry 1; **onchain** finds that log's head inside a
 public blockchain transaction. Only the third needs no trust in us at all.
 
+- 3-command quickstart against a real onchain-anchored receipt:
+  [`spec/QUICKSTART.md`](spec/QUICKSTART.md)
 - Full specification: [`spec/receipt-v3.md`](spec/receipt-v3.md) — enough to write your
   own verifier, including what the public log deliberately withholds and the hole that
   leaves
