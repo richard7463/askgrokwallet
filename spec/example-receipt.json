@@ -1,0 +1,29 @@
+{
+ "id": "appr_251810da-017",
+ "mode": "guarded",
+ "reason": "amount $5 exceeds ask threshold $1",
+ "sigAlg": "ED25519",
+ "source": "demo",
+ "status": "executed",
+ "target": "uniswap",
+ "txHash": "0x3c1e6c90130afe411a3561598429df9dc74694ac8373b7ac05e8f48aa8f558e3",
+ "execute": {
+  "to": "0x2A9574dE1B1C7FEa588C483d9a692b05A62e0d46",
+  "asset": "USDC",
+  "chainId": "11155111",
+  "amountUsd": 5
+ },
+ "summary": "swap 5",
+ "verdict": "ask",
+ "decision": "approve",
+ "policyId": "",
+ "signedAt": "2026-09-04T13:59:15.619Z",
+ "amountUsd": 5,
+ "createdAt": "2026-09-04T00:04:11.102Z",
+ "decidedAt": "2026-09-04T00:04:11.583Z",
+ "decidedBy": "operator@local",
+ "requester": "steps-test2",
+ "settledAt": "2026-09-04T00:05:15.226Z",
+ "signature": "JPdZtDiwVHzbTgrBnPRrBT863qfOXYsn8Vc45fWPeIgQn9+vkE6O3ZnEaBchvOKGMY7EFnpZXyHPcxhxxOoWDg==",
+ "sigVersion": 3
+}
