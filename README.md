@@ -27,6 +27,22 @@ agent request -> policy (allow / ask / deny) -> execute or approve -> signed rec
 
 ---
 
+## Product walkthrough (30 seconds)
+
+<p align="center">
+  <a href="https://askgrokwallet.io/askgrokwallet-demo.mp4">
+    <img src="assets/askgrokwallet-demo-poster.png" width="720" alt="AskGrokWallet — 30-second product walkthrough">
+  </a>
+</p>
+
+<p align="center">
+  ▶ <a href="https://askgrokwallet.io/askgrokwallet-demo.mp4">Play the 30-second walkthrough</a> ·
+  <a href="assets/askgrokwallet-demo.mp4">Download the mp4</a> ·
+  <a href="https://askgrokwallet.io/demo">Try the interactive demo</a>
+</p>
+
+---
+
 ## Live onchain (Base mainnet)
 
 The governed-wallet contracts are deployed on **Base mainnet** (chainId 8453).
