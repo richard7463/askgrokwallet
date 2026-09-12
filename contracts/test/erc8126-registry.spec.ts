@@ -121,4 +121,33 @@ describe("ERC-8126 VerificationScoreRegistry", () => {
       ctx.registry.submitAttestation(1, 5, ethers.ZeroHash, now + BigInt(3600), BigInt(2), future),
     ).to.be.revertedWithCustomError(ctx.registry, "AttestationFromFuture");
   });
+
+  it("rejects risk scores above the documented 0-100 scale and accepts 100", async () => {
+    const ctx = await deployFixture();
+    const now = BigInt(Math.floor(Date.now() / 1000));
+
+    for (const score of [101, 255]) {
+      const signature = await signAttestation(ctx, ctx.verifier, { score, issuedAt: now });
+      await expect(
+        ctx.registry.submitAttestation(1, score, ethers.ZeroHash, now, BigInt(score), signature),
+      ).to.be.revertedWithCustomError(ctx.registry, "RiskScoreOutOfRange");
+    }
+
+    // 100 is the documented max-risk sentinel and must remain storable.
+    const maxSignature = await signAttestation(ctx, ctx.verifier, {
+      score: 100,
+      issuedAt: now,
+      nonce: BigInt(999),
+      proofId: ethers.ZeroHash,
+    });
+    await (await ctx.registry.submitAttestation(
+      1,
+      100,
+      ethers.ZeroHash,
+      now,
+      BigInt(999),
+      maxSignature,
+    )).wait();
+    expect(await ctx.registry.getLatestRiskScore(1)).to.equal(100);
+  });
 });
