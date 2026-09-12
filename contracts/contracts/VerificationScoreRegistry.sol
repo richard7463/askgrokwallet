@@ -50,6 +50,7 @@ contract VerificationScoreRegistry {
     error NotVerifier(address recovered, address expected);
     error AttestationTooOld(uint256 issuedAt, uint256 maxAge);
     error AttestationFromFuture(uint256 issuedAt);
+    error RiskScoreOutOfRange(uint8 score);
     error NonceUsed(uint256 nonce);
     error BadSignatureLength(uint256 length);
 
@@ -97,6 +98,10 @@ contract VerificationScoreRegistry {
         uint256 nonce,
         bytes calldata signature
     ) external {
+        // ERC-8126 defines a 0-100 risk scale. Scores above 100 must never be
+        // stored, even when signed by the verifier: downstream consumers treat
+        // 100 as the max-risk sentinel and would break on out-of-range values.
+        if (overallRiskScore > 100) revert RiskScoreOutOfRange(overallRiskScore);
         if (issuedAt > block.timestamp + 5 minutes) revert AttestationFromFuture(issuedAt);
         if (block.timestamp > issuedAt + maxAttestationAge) revert AttestationTooOld(issuedAt, maxAttestationAge);
         if (usedNonces[nonce] != 0) revert NonceUsed(nonce);
