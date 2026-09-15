@@ -1,0 +1,49 @@
+{
+  "name": "@askgrokwallet/verify-receipt",
+  "version": "1.0.0",
+  "description": "Verify an AskGrokWallet receipt without trusting AskGrokWallet: signature, position in the hash-chained log, and onchain anchor, in one dependency-free file.",
+  "license": "MIT",
+  "author": "AskGrokWallet",
+  "homepage": "https://askgrokwallet.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/askgrokwallet/askgrokwallet.git",
+    "directory": "npm/verify-receipt"
+  },
+  "bugs": {
+    "url": "https://github.com/askgrokwallet/askgrokwallet/issues"
+  },
+  "keywords": [
+    "askgrokwallet",
+    "receipt",
+    "verifier",
+    "ed25519",
+    "hash-chain",
+    "agent-payments",
+    "audit"
+  ],
+  "bin": {
+    "verify-receipt": "./verify-receipt.mjs"
+  },
+  "files": [
+    "verify-receipt.mjs",
+    "SHA256SUMS",
+    "receipt-v3.schema.json",
+    "receipt-v4.schema.json",
+    "receipt-v5.schema.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prepack": "node scripts/prepack.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
