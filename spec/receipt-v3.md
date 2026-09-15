@@ -18,7 +18,7 @@ rewrite the log; after it, we cannot.
 ## Quick start
 
 ```bash
-curl -O https://raw.githubusercontent.com/richard7463/askgrokwallet/main/spec/verify-receipt.mjs
+curl -O https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.0/verify-receipt.mjs
 node verify-receipt.mjs receipt.json
 ```
 
@@ -26,9 +26,12 @@ Zero dependencies, one file, nothing to install. It re-implements the checks bel
 from this spec rather than importing ours — a verifier that runs the issuer's code
 is not a verifier. Add `--offline` to check the signature with no network at all.
 
-The same file is mirrored at `https://askgrokwallet.io/verify-receipt.mjs`; fetch it
-from this repo if you would rather not take it from the host that also serves the
-receipts.
+The tagged release is the artifact of record: it cannot change under you, and
+`node verify-receipt.mjs --version` prints the sha256 of the bytes you are running
+so two people can confirm they hold the same file. The same file is mirrored at
+`https://askgrokwallet.io/verify-receipt.mjs`; fetching it from this repo is better
+if you would rather not take the verifier from the host that also serves the
+receipts, and if the mirror ever disagrees with the release, the release wins.
 
 | flag | effect |
 |---|---|
@@ -37,6 +40,7 @@ receipts.
 | `--rpc=<url>` | JSON-RPC endpoint for the onchain check |
 | `--offline` | signature only |
 | `--json` | machine-readable output |
+| `--version` | this verifier's version and the sha256 of the file, then exit |
 
 Machine-readable field types: [`receipt-v3.schema.json`](receipt-v3.schema.json)
 (JSON Schema draft 2020-12). Passing that schema says nothing about authenticity —
@@ -107,12 +111,15 @@ The public key is base64 SPKI DER.
 
 Production key fingerprint `sha256(der)[:16]` = `39626850145403d3`.
 
-**Only `sigVersion === 3` verifies. There is no version branch.** v1 read its version
-off the untrusted row *and* carried a hardcoded fallback secret, so anyone who set
-`sigVersion` to `1` could mint receipts that verified. v2 signed 13 fields and left
-the destination out, so a receipt still verified after its payee address and tx hash
-were swapped. Rows older than v3 therefore read as *unverified*, which is the honest
-answer rather than a comforting one.
+**This document specifies v3.** The verifier carries a fixed field list for v3, v4
+and v5 and dispatches on the row's `sigVersion` against those lists — it never lets
+a receipt supply its own fields or its own canonicalization, which is the part that
+has to stay closed. v1 read its version off the untrusted row *and* carried a
+hardcoded fallback secret, so anyone who set `sigVersion` to `1` could mint receipts
+that verified. v2 signed 13 fields and left the destination out, so a receipt still
+verified after its payee address and tx hash were swapped. A `sigVersion` with no
+fixed list — anything below v3, and anything above v5 — is refused outright with a
+`✗` rather than half-believed, because for those there is no honest way to say yes.
 
 ## 2. Chain layer
 

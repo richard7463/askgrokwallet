@@ -15,8 +15,12 @@
 //   chain      this receipt's signing event sits at a fixed position in a
 //              published append-only log, linked hash by hash back to entry 1.
 //   onchain    the head of that log was written into a public blockchain
-//              transaction. From that block onward, not even we can rewrite the
-//              history it covers — the thing you are trusting is the chain.
+//              transaction, IN A BLOCK, and that transaction succeeded. From
+//              that block onward, not even we can rewrite the history it covers —
+//              the thing you are trusting is the chain. A transaction that is
+//              broadcast but not yet mined is reported as pending: until it
+//              lands it can be dropped, replaced, or reorged away, so "fixed
+//              onchain" would be a claim we cannot back.
 //
 // What it does NOT prove: that the payment was wise, that the agent should have
 // been allowed to make it, or that entries belonging to OTHER receipts say what
@@ -29,18 +33,49 @@
 //   --rpc=<url>              JSON-RPC endpoint for the onchain check
 //   --offline                signature only; skip everything that needs network
 //   --json                   machine-readable output
+//   --version                print this verifier's version and the sha256 of the
+//                            bytes you are running, then exit
 
 import crypto from "node:crypto";
 import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+
+// The version of THIS FILE, and — computed at run time — the hash of the bytes
+// you are actually holding. A verifier that can change silently under a fixed URL
+// is unverifiable by construction: two people comparing notes have to know they
+// ran the same thing, and "the copy from askgrokwallet.io" stops being an answer
+// the moment that page is redeployed. `--version` prints both; every release
+// publishes the same hash, so a mismatch is visible instead of silent.
+const VERIFIER_VERSION = "1.0.0";
+
+function selfSha256() {
+  return crypto.createHash("sha256").update(fs.readFileSync(fileURLToPath(import.meta.url))).digest("hex");
+}
 
 // ── The spec, restated. Changing any of it changes what verifies. ────────────
-const SIG_VERSION = 3;
-const SIGNED_FIELDS = [
-  "id", "summary", "amountUsd", "requester", "target", "policyId", "source", "mode", "intentKind",
-  "verdict", "reason", "status", "decision", "decidedBy",
-  "execute", "rail", "railRef", "txHash", "executionError",
-  "createdAt", "decidedAt", "settledAt",
-];
+const SIGNED_FIELDS = {
+  3: [
+    "id", "summary", "amountUsd", "requester", "target", "policyId", "source", "mode", "intentKind",
+    "verdict", "reason", "status", "decision", "decidedBy",
+    "execute", "rail", "railRef", "txHash", "executionError",
+    "createdAt", "decidedAt", "settledAt",
+  ],
+  4: [
+    "id", "summary", "amountUsd", "requester", "target", "policyId", "source", "mode", "intentKind",
+    "verdict", "reason", "status", "decision", "decidedBy",
+    "execute", "rail", "railRef", "txHash", "executionError",
+    "createdAt", "decidedAt", "settledAt", "connector", "actionKind", "action", "proposalDigest",
+    "approvedDigest", "expiresAt", "executionState", "idempotencyKey", "providerMessageId", "providerThreadId", "providerOutcome",
+  ],
+  5: [
+    "id", "summary", "amountUsd", "requester", "target", "policyId", "source", "mode", "intentKind",
+    "verdict", "reason", "status", "decision", "decidedBy",
+    "execute", "rail", "railRef", "txHash", "executionError",
+    "createdAt", "decidedAt", "settledAt", "connector", "actionKind", "action", "proposalDigest",
+    "approvedDigest", "expiresAt", "executionState", "idempotencyKey", "providerMessageId", "providerThreadId", "providerOutcome",
+    "resolutionOutcome", "resolutionNote", "resolvedAt", "resolvedBy",
+  ],
+};
 const CHAIN_VERSION = 1;
 const GENESIS_PREV_HASH = "0".repeat(64);
 
@@ -70,6 +105,14 @@ const asJson = process.argv.includes("--json");
 const api = String(flag("api", DEFAULT_API)).replace(/\/+$/, "");
 const file = process.argv.slice(2).find((a) => !a.startsWith("--"));
 
+// Answered before anything else, so it works with no receipt in hand and no
+// network: "which verifier am I running" is a question about this file alone.
+if (process.argv.includes("--version")) {
+  console.log(`verify-receipt ${VERIFIER_VERSION}`);
+  console.log(`sha256 ${selfSha256()}`);
+  process.exit(0);
+}
+
 if (!file) {
   console.error("usage: node verify-receipt.mjs receipt.json [--offline] [--key=<base64>] [--api=<origin>]");
   process.exit(2);
@@ -92,12 +135,19 @@ function canonicalValue(value) {
   return out;
 }
 
-// Note the version prefix: it is fixed at 3 here, never read off the receipt. A
-// receipt that could pick its own canonicalization could pick an easier one.
+// Version dispatch is limited to this verifier's fixed v3/v4 definitions. A
+// receipt cannot supply its own field list or canonicalization.
+function receiptVersion(row) {
+  const version = Number(row.sigVersion);
+  return Object.hasOwn(SIGNED_FIELDS, version) ? version : null;
+}
+
 function canonicalReceipt(row) {
+  const version = receiptVersion(row);
+  if (!version) throw new Error(`unsupported sigVersion ${row.sigVersion}`);
   const obj = {};
-  for (const key of SIGNED_FIELDS) obj[key] = canonicalValue(row[key]);
-  return `v${SIG_VERSION}:` + JSON.stringify(obj);
+  for (const key of SIGNED_FIELDS[version]) obj[key] = canonicalValue(row[key]);
+  return `v${version}:` + JSON.stringify(obj);
 }
 
 // Every value is length-prefixed before hashing, so free text inside a receipt
@@ -127,6 +177,13 @@ async function getJson(url, body) {
     : undefined);
   if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`);
   return res.json();
+}
+
+// `Number(null)` is 0, and "block 0" is a claim nobody made. Every block height
+// that arrives over JSON-RPC goes through here so a missing one stays missing
+// instead of turning into a plausible-looking number.
+function blockHeight(value) {
+  return value === null || value === undefined || value === "" ? null : Number(value);
 }
 
 // A key you got from the same place you got the receipt proves less than a key
@@ -170,8 +227,9 @@ function verifyWith(receipt, b64) {
 function checkSignature(receipt, key) {
   if (!key) return { mark: "~", note: "skipped (--offline with no --key)" };
   if (!receipt.signature) return { mark: "✗", note: "receipt carries no signature" };
-  if (Number(receipt.sigVersion) !== SIG_VERSION) {
-    return { mark: "✗", note: `sigVersion ${receipt.sigVersion} — only v${SIG_VERSION} covers where the money went` };
+  const version = receiptVersion(receipt);
+  if (!version) {
+    return { mark: "✗", note: `sigVersion ${receipt.sigVersion} is not supported; only v3, v4, and v5 are defined` };
   }
   let ok = false;
   try {
@@ -180,7 +238,7 @@ function checkSignature(receipt, key) {
     return { mark: "✗", note: `could not check: ${error.message}` };
   }
   if (ok) {
-    return { mark: "✓", note: `${SIGNED_FIELDS.length} fields signed · key ${keyFingerprint(key.b64)} (${key.origin})` };
+    return { mark: "✓", note: `${SIGNED_FIELDS[version].length} fields signed (v${version}) · key ${keyFingerprint(key.b64)} (${key.origin})` };
   }
   // A receipt that fails the pinned key but passes the key the issuer serves
   // today is NOT the same event as a forgery, and calling it one would cry wolf
@@ -287,10 +345,49 @@ async function checkOnchain(entry, entries, anchors) {
   if (!String(tx.input).toLowerCase().includes(String(covering.headHash).toLowerCase())) {
     return { mark: "✗", note: "anchor tx does not contain this log head" };
   }
-  const block = Number(tx.blockNumber);
+
+  // The node answered with a transaction, but "it exists" and "it is in a block"
+  // are different claims, and only the second one is load-bearing. A mempool
+  // transaction has no blockNumber — it can be dropped, replaced by a same-nonce
+  // tx, or reorged away — so ticking it would assert the exact thing this line
+  // exists to prove, before it is true. `Number(null)` is 0, which is how this
+  // used to print "block 0" and read as fixed.
+  if (tx.blockNumber === null || tx.blockNumber === undefined || tx.blockNumber === "") {
+    return {
+      mark: "~",
+      pending: true,
+      note:
+        `anchor tx ${String(covering.txHash).slice(0, 12)}… is broadcast but not in a block yet — ` +
+        `this log is NOT fixed onchain, and we could still rewrite it`,
+    };
+  }
+
+  // A mined hash proves the transaction was included. It does not prove the head
+  // reached the contract: a reverted anchor keeps the head in its calldata while
+  // writing nothing. Only the receipt says which of those happened, so ask for it
+  // and refuse to credit the weaker one.
+  let receipt = null;
+  try {
+    const res = await getJson(rpc, { jsonrpc: "2.0", id: 1, method: "eth_getTransactionReceipt", params: [covering.txHash] });
+    receipt = res.result;
+  } catch {
+    // Not every node answers this, and an unanswerable question is not evidence
+    // the anchor failed — the transaction object already put it in a block.
+  }
+  const block = blockHeight(receipt?.blockNumber ?? tx.blockNumber);
+  if (receipt && receipt.status != null && String(receipt.status) !== "0x1") {
+    return {
+      mark: "~",
+      reverted: true,
+      note:
+        `anchor tx ${String(covering.txHash).slice(0, 12)}… is ${block === null ? "in a block" : `in block ${block}`} but it REVERTED — ` +
+        `the head sits in its calldata, not in ${covering.contractAddress}; anyone resolving anchors ` +
+        `against the contract finds nothing`,
+    };
+  }
   return {
     mark: "✓",
-    note: `head ${covering.chainSeq} written in ${String(covering.txHash).slice(0, 12)}… block ${block} · chain ${covering.chainId}`,
+    note: `head ${covering.chainSeq} written in ${String(covering.txHash).slice(0, 12)}…${block === null ? "" : ` block ${block}`} · chain ${covering.chainId}`,
   };
 }
 
@@ -321,12 +418,24 @@ async function main() {
         ? { mark: "~", note: "inconclusive — nothing was checked (pass --key to check offline)" }
         : onchain.mark === "✓"
           ? { mark: "✓", note: "genuine, and fixed onchain" }
-          : chain.mark === "✓"
-            ? { mark: "~", note: "genuine, but not yet fixed onchain — we could still rewrite the log" }
-            : { mark: "~", note: "signature is genuine; the published log was not checked" };
+          : onchain.pending
+            ? { mark: "~", note: "genuine, but its anchor is not in a block yet — not fixed onchain, and we could still rewrite the log" }
+            : onchain.reverted
+              ? { mark: "~", note: "genuine, but its anchor transaction reverted — the head never reached the contract, so the chain fixes nothing" }
+              : chain.mark === "✓"
+                ? { mark: "~", note: "genuine, but not yet fixed onchain — we could still rewrite the log" }
+                : { mark: "~", note: "signature is genuine; the published log was not checked" };
 
   if (asJson) {
-    console.log(JSON.stringify({ receiptId: receipt.id, genuine, signature, chain: { ...chain, entry: undefined }, onchain, verdict }, null, 2));
+    console.log(JSON.stringify({
+      verifier: { version: VERIFIER_VERSION, sha256: selfSha256() },
+      receiptId: receipt.id,
+      genuine,
+      signature,
+      chain: { ...chain, entry: undefined },
+      onchain,
+      verdict,
+    }, null, 2));
   } else {
     const line = (label, r) => console.log(`${label.padEnd(10)} ${r.mark}  ${r.note}`);
     line("signature", signature);
