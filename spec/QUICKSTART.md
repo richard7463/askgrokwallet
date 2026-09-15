@@ -4,19 +4,27 @@ No install, no dependencies, Node 18+. You verify a real receipt that was
 issued on production and anchored onchain — without trusting us.
 
 ```bash
-curl -O https://raw.githubusercontent.com/richard7463/askgrokwallet/main/spec/verify-receipt.mjs
-curl -O https://raw.githubusercontent.com/richard7463/askgrokwallet/main/spec/example-receipt.json
+curl -O https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.0/verify-receipt.mjs
+curl -O https://raw.githubusercontent.com/askgrokwallet/askgrokwallet/verify-receipt-v1.0.0/spec/example-receipt.json
+node verify-receipt.mjs --version          # optional: version + sha256 of the file
 node verify-receipt.mjs example-receipt.json
 ```
 
-Expected output:
+Both URLs are pinned to the `verify-receipt-v1.0.0` tag, so the file cannot change
+under you. `--version` prints the sha256 of the bytes you are running; compare it
+with the hash in the [release notes](https://github.com/askgrokwallet/askgrokwallet/releases/tag/verify-receipt-v1.0.0).
+
+Expected output (verifier 1.0.0):
 
 ```
-signature  ✓  22 fields signed · key 39626850145403d3 (pinned in this file)
-chain      ✓  entry 11 of 12 (imported) · links unbroken back to 1
+signature  ✓  22 fields signed (v3) · key 39626850145403d3 (pinned in this file)
+chain      ✓  entry 11 of 38 (imported) · links unbroken back to 1
 onchain    ✓  head 11 written in 0xb3d35ee618… block 11633900 · chain 11155111
 verdict    ✓  genuine, and fixed onchain
 ```
+
+`entry 11 of 38` is this receipt's fixed position in the log — entry 11 never
+changes, the total grows as the log grows, so yours will be larger.
 
 ## What each line proves
 
@@ -28,8 +36,12 @@ verdict    ✓  genuine, and fixed onchain
 - **chain** — this receipt's signing event sits at a fixed position in a
   published append-only log, hash-linked back to entry 1.
 - **onchain** — the head of that log was written into a public blockchain
-  transaction (Ethereum Sepolia in this example). From that block onward,
-  not even we can rewrite the history it covers.
+  transaction **that is in a block and succeeded** (Ethereum Sepolia in this
+  example). From that block onward, not even we can rewrite the history it covers.
+  A transaction that is still in the mempool is reported as `~` pending, never as
+  fixed: until it lands it can be dropped, replaced at the same nonce, or reorged
+  away. A reverted anchor is reported the same way, with the reason — it carries
+  the log head in its calldata while writing nothing to the contract.
 
 What it does **not** prove: that the payment was wise, or that the agent
 should have been allowed to make it. It proves this receipt is genuine,
@@ -64,9 +76,30 @@ through a channel independent of us, verify against yours:
 node verify-receipt.mjs --key=<base64-spki-der> example-receipt.json
 ```
 
+## Check the verifier itself
+
+The verifier ships with a behaviour test that needs nothing but Node. It starts a
+stub node and a stub log inside its own process, signs a throwaway receipt, and
+reads what the verifier prints for each shape a node can answer with — including
+the regression that came from an outside review: a transaction that is broadcast
+but not yet mined must never read as "fixed onchain". Keep both files in the same
+directory:
+
+```bash
+curl -O https://raw.githubusercontent.com/askgrokwallet/askgrokwallet/verify-receipt-v1.0.0/spec/test-verify-receipt.mjs
+node test-verify-receipt.mjs
+```
+
+The same file is mirrored at `https://askgrokwallet.io/verify-receipt.mjs`. The
+tagged release is the artifact of record: a mirror can lag a deploy, so if the two
+disagree, compare `--version` against the release notes before believing either.
+Note that our own instructions used to point at the *mutable* `main` URL — which is
+how a copy silently stayed a week old. The tag exists so that cannot happen again.
+
 ## Go deeper
 
 - Full receipt specification: [receipt-v3.md](receipt-v3.md)
-- JSON Schema: [receipt-v3.schema.json](receipt-v3.schema.json)
+- JSON Schemas: [v3](receipt-v3.schema.json) · [v4](receipt-v4.schema.json) · [v5](receipt-v5.schema.json)
+- Changelog, version by version: [CHANGELOG.md](CHANGELOG.md)
 - The verifier, line by line: [verify-receipt.mjs](verify-receipt.mjs)
   (read it before you trust it — that is the point)

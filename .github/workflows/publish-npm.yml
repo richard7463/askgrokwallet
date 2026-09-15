@@ -1,0 +1,68 @@
+# Publishes the verifier to npm — from a release, with provenance.
+#
+# The tarball is built from the tagged bytes: npm/verify-receipt/scripts/prepack.mjs
+# copies spec/verify-receipt.mjs (plus the schemas, licence and changelog) into the
+# package at pack time, and refuses to continue if the version in the file and in
+# package.json disagree, if the file imports anything outside Node, or if the file
+# does not report its own sha256 correctly when run. So the provenance record npm
+# prints is a statement about the same bytes the GitHub release publishes.
+#
+# Auth: NPM_TOKEN, a granular automation token with publish rights on
+# @askgrokwallet. The first publish has to be done this way, because npm trusted
+# publishing can only be configured for a package that already exists. After that,
+# switching to OIDC (id-token: write, no secret) is the better end state, and the
+# only change needed here is dropping NODE_AUTH_TOKEN.
+
+name: Publish npm package
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write # npm provenance signing
+
+jobs:
+  publish:
+    name: npm publish @askgrokwallet/verify-receipt
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      # A tag that disagrees with the version inside the file would publish an
+      # artifact that answers "which verifier is this?" two different ways.
+      - name: Release tag matches the packaged version
+        if: github.event_name == 'release'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          node -e '
+            const tag = String(process.env.TAG).replace(/^verify-receipt-v/, "");
+            const { version } = require("./npm/verify-receipt/package.json");
+            if (tag !== version) {
+              console.error(`release tag ${tag} does not match package version ${version}`);
+              process.exit(1);
+            }
+            console.log(`tag and version agree: ${version}`);
+          '
+
+      - name: Behaviour test of the file being published
+        run: node spec/test-verify-receipt.mjs
+
+      - name: Pack (prepack asserts version, zero dependencies, self-hash)
+        working-directory: npm/verify-receipt
+        run: npm pack --dry-run
+
+      - name: Publish with provenance
+        if: github.event_name == 'release'
+        working-directory: npm/verify-receipt
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
