@@ -80,10 +80,14 @@ published this and from what", which a local `npm publish` cannot give you.
 
 ## Schemas
 
-The tarball ships the JSON Schemas for the signature versions this verifier
-understands: `receipt-v3.schema.json`, `receipt-v4.schema.json`,
-`receipt-v5.schema.json`. A schema describes shape; it cannot describe authenticity.
-It says nothing about whether a receipt is genuine — run the verifier for that.
+The tarball ships the JSON Schemas for the signature versions that have signed in
+production: `receipt-v3.schema.json` (historical) and `receipt-v4.schema.json`
+(current). The verifier also understands the v5 field list, but no v5 schema is
+published while v5 is not signing — a schema is a promise to implementers, and
+that one would be premature.
+
+A schema describes shape; it cannot describe authenticity. It says nothing about
+whether a receipt is genuine — run the verifier for that.
 
 ## License
 
