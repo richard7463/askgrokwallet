@@ -99,7 +99,11 @@ how a copy silently stayed a week old. The tag exists so that cannot happen agai
 ## Go deeper
 
 - Full receipt specification: [receipt-v3.md](receipt-v3.md)
-- JSON Schemas: [v3](receipt-v3.schema.json) · [v4](receipt-v4.schema.json) · [v5](receipt-v5.schema.json)
+- JSON Schemas: [v3](receipt-v3.schema.json) · [v4](receipt-v4.schema.json) — the
+  versions that have signed in production. The verifier also understands the v5
+  field list, but v5 does not sign in production yet, so its schema is deliberately
+  not published: a schema is a promise to implementers, and this one would be
+  premature.
 - Changelog, version by version: [CHANGELOG.md](CHANGELOG.md)
 - The verifier, line by line: [verify-receipt.mjs](verify-receipt.mjs)
   (read it before you trust it — that is the point)

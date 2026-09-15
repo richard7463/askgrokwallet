@@ -26,7 +26,10 @@ const pkgDir = path.resolve(here, "..");
 const repo = path.resolve(pkgDir, "..", "..");
 const specDir = path.join(repo, "spec");
 
-const SCHEMAS = ["receipt-v3.schema.json", "receipt-v4.schema.json", "receipt-v5.schema.json"];
+// v5 is understood by the verifier but not published as a schema: it is not
+// signing in production yet, so a schema for it would promise a format that can
+// still change. See spec/CHANGELOG.md.
+const SCHEMAS = ["receipt-v3.schema.json", "receipt-v4.schema.json"];
 const sha256 = (file) => crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const fail = (message) => {
   console.error(`prepack: ${message}`);
