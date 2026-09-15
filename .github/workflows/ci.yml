@@ -32,6 +32,42 @@ jobs:
             echo "possible secret found"; exit 1
           fi
           echo "no obvious secrets"
+
+  verifier:
+    name: Verifier — hermetic behaviour, zero dependencies, packable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      # hermetic: a stub node and a stub log inside the test process, so a flaky
+      # RPC or a redeployed site cannot make this job red for the wrong reason
+      - name: Behaviour test (includes a broadcast anchor not reading as fixed)
+        run: node spec/test-verify-receipt.mjs
+      - name: Version and self-hash
+        run: node spec/verify-receipt.mjs --version
+      - name: The shipped example verifies with no network at all
+        run: |
+          out="$(node spec/verify-receipt.mjs spec/example-receipt.json --offline)"
+          echo "$out"
+          echo "$out" | grep -q "signature  ✓" || { echo "the shipped example stopped verifying offline"; exit 1; }
+      - name: No dependencies, ever
+        run: |
+          imports="$(grep -oE '^import .* from "[^"]+";' spec/verify-receipt.mjs | grep -oE '"[^"]+"' | tr -d '"' | grep -v '^node:' || true)"
+          if [ -n "$imports" ]; then
+            echo "verify-receipt.mjs must import only node: built-ins, found: $imports"
+            exit 1
+          fi
+          echo "built-ins only"
+      - name: npm package packs and agrees with the spec file
+        working-directory: npm/verify-receipt
+        run: npm pack --dry-run
+      # informational: depends on the live site and a public RPC, so it must not
+      # be able to fail the build for reasons that have nothing to do with the code
+      - name: Live end-to-end against the deployed log (informational)
+        continue-on-error: true
+        run: node spec/verify-receipt.mjs spec/example-receipt.json
   contracts:
     name: Contracts compile + test
     runs-on: ubuntu-latest

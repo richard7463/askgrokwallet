@@ -1,0 +1,9 @@
+# Generated at pack time from this repo's spec/ — never commit a second copy of the
+# verifier, because two copies are two artifacts and only one of them is reviewed.
+verify-receipt.mjs
+receipt-v3.schema.json
+receipt-v4.schema.json
+receipt-v5.schema.json
+LICENSE
+CHANGELOG.md
+SHA256SUMS
