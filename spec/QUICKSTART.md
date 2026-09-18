@@ -26,6 +26,19 @@ verdict    ✓  genuine, and fixed onchain
 `entry 11 of 38` is this receipt's fixed position in the log — entry 11 never
 changes, the total grows as the log grows, so yours will be larger.
 
+### Or let the repository do it in one command
+
+`spec/judge-check.mjs` runs the same check and adds two things: it asserts that the
+verifier you are holding is byte-for-byte the released one, and it reports the size
+and integrity of the live log. Useful when you are reviewing rather than reading:
+
+```bash
+node spec/judge-check.mjs
+```
+
+Exit codes: `0` verified · `1` something provably wrong · `2` inconclusive (no
+network, or the service is unreachable).
+
 ## What each line proves
 
 - **signature** — the receipt was signed by the published Ed25519 key
