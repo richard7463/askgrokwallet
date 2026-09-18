@@ -57,6 +57,7 @@ and each one is checkable from outside this repository:
 | Public receipt log (live JSON) | https://askgrokwallet.io/api/receipts/chain |
 | Receipt verifier — one file, zero dependencies | [release `verify-receipt-v1.0.0`](https://github.com/richard7463/askgrokwallet/releases/tag/verify-receipt-v1.0.0) · sha256 `ba066e7cdb19a0b9a5efb1eed6ba62d2440c9a5aeaee2d60caba12707acecf73` |
 | Check it yourself, in one command | `node spec/judge-check.mjs` — asserts the verifier is the released bytes, verifies a real receipt against the live log, and reports the log's size and integrity |
+| Write your own verifier, then check it | [`spec/vectors/`](spec/vectors/) — frozen canonical-bytes, hash and signature vectors, plus two implementations (Node and Python) that must reproduce the same bytes: `node spec/vectors/run-vectors.mjs` |
 | Onchain proof | [transactions and blocks](#live-proof--checked-2026-09-18) · [deployed contracts](#deployed-and-verified-contracts) |
 | Tests you can run in three minutes | 20 contract tests · 10 verifier behaviour assertions · plugin package smoke test — see [Local run](#local-run) |
 | Track entered | **Bankr grand prize** — agentic commerce / autonomous financial agents |
@@ -396,10 +397,14 @@ cd contracts && npm ci && npm test && cd ..
 #    position, onchain anchor), and the published log is intact
 node spec/judge-check.mjs
 
-# 3. the verifier checks itself against a stub node and a stub log — no network
+# 3. the format is the rules, not our code: two implementations must agree byte-for-byte
+node spec/vectors/run-vectors.mjs
+python3 spec/vectors/canonical.py
+
+# 4. the verifier checks itself against a stub node and a stub log — no network
 node spec/test-verify-receipt.mjs
 
-# 4. plugin package structure
+# 5. plugin package structure
 node scripts/smoke.mjs
 ```
 
