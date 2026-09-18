@@ -60,6 +60,12 @@ jobs:
             exit 1
           fi
           echo "built-ins only"
+      # The format is the rules, not our code: two independent implementations must
+      # reproduce every published byte before anyone claims conformance.
+      - name: Conformance vectors — Node
+        run: node spec/vectors/run-vectors.mjs
+      - name: Conformance vectors — Python
+        run: python3 spec/vectors/canonical.py
       - name: npm package packs and agrees with the spec file
         working-directory: npm/verify-receipt
         run: npm pack --dry-run
