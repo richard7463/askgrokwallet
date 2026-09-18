@@ -1,0 +1,58 @@
+{
+  "format": "askgrokwallet-receipt-chain-entry",
+  "note": "Entry-hash vectors. The head hash is what gets anchored onchain, so these bytes are the ones a rewrite would have to reproduce.",
+  "rule": "preimage = \"rc1|\" + len(prevHash):prevHash|len(chainSeq):chainSeq|len(receiptId):receiptId|len(event):event|len(signedAt):signedAt|len(signature):signature|len(canonical):canonical, joined by '|', where len(v) is the UTF-8 byte length and the value follows the colon. entryHash = hex(sha256(utf8(preimage)))",
+  "genesisPrevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "entries": [
+    {
+      "chainSeq": 1,
+      "receiptId": "appr_chain_1",
+      "event": "created",
+      "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "signedAt": "2026-09-18T00:06:01.000Z",
+      "signature": "jQGhmZFY99p7d/dg8SuajAB9K546lgbITxk0nH2IhzFv1E1CjWPN+pCXHxo3ky0YTafwPCFN8e5sW1MXI4cGCg==",
+      "canonical": "v3:{\"id\":\"appr_chain_1\",\"summary\":\"payment 1\",\"amountUsd\":42,\"requester\":\"agent\",\"target\":\"vendor\",\"policyId\":\"policy-1\",\"source\":\"demo\",\"mode\":\"ask\",\"intentKind\":\"purchase\",\"verdict\":\"ask\",\"reason\":\"over the auto-allow threshold\",\"status\":\"settled\",\"decision\":\"approve\",\"decidedBy\":\"operator@example.com\",\"execute\":{\"amountUsd\":42,\"asset\":\"USDC\",\"chainId\":8453,\"to\":\"0x1111111111111111111111111111111111111111\"},\"rail\":\"evm:8453\",\"railRef\":\"0xabc\",\"txHash\":\"0xabc\",\"executionError\":null,\"createdAt\":\"2026-09-18T00:00:00.000Z\",\"decidedAt\":\"2026-09-18T00:05:00.000Z\",\"settledAt\":\"2026-09-18T00:06:00.000Z\"}",
+      "entryHash": "ff1af6d93bb503d7a8141b19882c664f7d1c4e898595e8cd9ad5162ccf863f25"
+    },
+    {
+      "chainSeq": 2,
+      "receiptId": "appr_chain_2",
+      "event": "decided",
+      "prevHash": "ff1af6d93bb503d7a8141b19882c664f7d1c4e898595e8cd9ad5162ccf863f25",
+      "signedAt": "2026-09-18T00:06:01.000Z",
+      "signature": "IwCidh1TPSxHN8eD3cRHUCqOA/O1xHWk1Yg2FzDYzAiAlyCh7gu1zsFqaAQkzOQm/1aM6r1Ptd2doShftM8QCw==",
+      "canonical": "v3:{\"id\":\"appr_chain_2\",\"summary\":\"payment 2\",\"amountUsd\":42,\"requester\":\"agent\",\"target\":\"vendor\",\"policyId\":\"policy-1\",\"source\":\"demo\",\"mode\":\"ask\",\"intentKind\":\"purchase\",\"verdict\":\"ask\",\"reason\":\"over the auto-allow threshold\",\"status\":\"settled\",\"decision\":\"approve\",\"decidedBy\":\"operator@example.com\",\"execute\":{\"amountUsd\":42,\"asset\":\"USDC\",\"chainId\":8453,\"to\":\"0x1111111111111111111111111111111111111111\"},\"rail\":\"evm:8453\",\"railRef\":\"0xabc\",\"txHash\":\"0xabc\",\"executionError\":null,\"createdAt\":\"2026-09-18T00:00:00.000Z\",\"decidedAt\":\"2026-09-18T00:05:00.000Z\",\"settledAt\":\"2026-09-18T00:06:00.000Z\"}",
+      "entryHash": "1b78cd9c368485cb23339ee912a06e2d877ece6c4ce075bed6bc973c0d448f96"
+    },
+    {
+      "chainSeq": 3,
+      "receiptId": "appr_chain_3",
+      "event": "settled",
+      "prevHash": "1b78cd9c368485cb23339ee912a06e2d877ece6c4ce075bed6bc973c0d448f96",
+      "signedAt": "2026-09-18T00:06:01.000Z",
+      "signature": "q4Vqr3hn8DDQgfjE0jM0RXKiifQjqPmNJPJGTlJ47CsmBY86Xeq9gkUcm/h48BSOsU01QDPD/ox76I36NsN+AA==",
+      "canonical": "v3:{\"id\":\"appr_chain_3\",\"summary\":\"payment 3\",\"amountUsd\":42,\"requester\":\"agent\",\"target\":\"vendor\",\"policyId\":\"policy-1\",\"source\":\"demo\",\"mode\":\"ask\",\"intentKind\":\"purchase\",\"verdict\":\"ask\",\"reason\":\"over the auto-allow threshold\",\"status\":\"settled\",\"decision\":\"approve\",\"decidedBy\":\"operator@example.com\",\"execute\":{\"amountUsd\":42,\"asset\":\"USDC\",\"chainId\":8453,\"to\":\"0x1111111111111111111111111111111111111111\"},\"rail\":\"evm:8453\",\"railRef\":\"0xabc\",\"txHash\":\"0xabc\",\"executionError\":null,\"createdAt\":\"2026-09-18T00:00:00.000Z\",\"decidedAt\":\"2026-09-18T00:05:00.000Z\",\"settledAt\":\"2026-09-18T00:06:00.000Z\"}",
+      "entryHash": "4c3656f915078132928dce7a96d06b077f572b46fbc89140fb7579d316c6e0cd"
+    }
+  ],
+  "headHash": "4c3656f915078132928dce7a96d06b077f572b46fbc89140fb7579d316c6e0cd",
+  "negativeVectors": [
+    {
+      "id": "edited-middle-entry",
+      "why": "editing an entry changes its own hash, so every later prevHash stops matching",
+      "change": "replace `payment 2` with `payment 9000` inside entry 2's canonical",
+      "expected": "entry 2 no longer hashes to its published entryHash, and entry 3's prevHash no longer matches entry 2"
+    },
+    {
+      "id": "delimiter-injection",
+      "why": "the length prefix exists so a receipt summary cannot imitate a field boundary",
+      "change": "sign two receipts whose summaries are \"8:|4:oops\" and \"x\", then build an entry from each",
+      "expected": "the two entry hashes differ, even though a naive join would collide",
+      "hashes": {
+        "withSummaryThatImitatesAField": "2cff94b3d52921329e289bebc71f6135f617f06bde12f188abd72aaaeffd578f",
+        "withAShortSummary": "0d4f2c95461240402e8b9a844ff2c2a8fe18c174bad000993718822bed132e3c",
+        "differ": true
+      }
+    }
+  ]
+}
