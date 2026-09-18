@@ -66,6 +66,9 @@ jobs:
         run: node spec/vectors/run-vectors.mjs
       - name: Conformance vectors — Python
         run: python3 spec/vectors/canonical.py
+      # Audit bundles: an honest one verifies, and four ways of lying are caught.
+      - name: Audit bundle — hermetic
+        run: node spec/audit-bundle.test.mjs
       - name: npm package packs and agrees with the spec file
         working-directory: npm/verify-receipt
         run: npm pack --dry-run
