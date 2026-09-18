@@ -228,6 +228,26 @@ protection a mode cannot deliver:
 still cannot stop an agent from exfiltrating a raw private key — key hygiene is a
 different layer, and saying otherwise would be a lie.
 
+## Execution rails — the bound moves with the money
+
+The policy and the receipt are the same everywhere; what changes is *where the bound is
+enforced*, and that follows where the agent's funds actually live. Two rails run today,
+a third is deliberately labelled as the weakest, and the receipt does not care which one
+produced it — that rail-independence is the point.
+
+| Rail | Who holds the funds | Where the bound is enforced | Evidence |
+| --- | --- | --- | --- |
+| **Contract (BoundlessVault)** | the vault, under an ERC-8196 lease | the contract **reverts** before value moves | Sepolia [`0xbaf2c377…`](https://sepolia.etherscan.io/tx/0xbaf2c3776398e4f8d891b4e3da218361cfa6e79fb72edd603f11e8bf5a5e58e3) |
+| **The agent's own wallet** | a server wallet — MPC key shares, no raw key in our backend or the agent's process | **wallet-layer rules evaluated before signing** (allowlist, per-call value limit, key export blocked) | Base mainnet [`0x2d73c475…`](https://basescan.org/tx/0x2d73c475be9be8bfee8baffd699ffb34b9d18cf80a7a0c17e5ad1583d1181c0a) + two refusals that broadcast nothing |
+| `watchdog` (host gate) | the agent's own EOA | a signing hook inside the agent's process | unit tests — **the weakest rail**, bypassed by anything holding a raw key, and we say so |
+| **x402 / metered API rails** | planned | the approval boundary is designed to compose with conditional payments | not implemented |
+
+Why the second rail matters: a wallet vendor can enforce its own rules on its own wallet,
+and a host can put a switch in its own UI. Neither can hand the operator a record that a
+counterparty, an auditor or a marketplace accepts **without trusting the operator**. That
+is the layer this repository is, and it is the reason the bound and the proof are separate
+things.
+
 ## Quickstart
 
 ### 1. Install the plugin package
