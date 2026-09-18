@@ -51,6 +51,7 @@ and each one is checkable from outside this repository:
 | What | Where |
 | --- | --- |
 | Live product | https://askgrokwallet.io |
+| Submission demo, 2:03 (video) | [askgrokwallet.io/askgrokwallet-demo-runtime.mp4](https://askgrokwallet.io/askgrokwallet-demo-runtime.mp4) — the product walkthrough plus the verification and outside-review segments |
 | 30-second demo (video) | [askgrokwallet.io/askgrokwallet-demo.mp4](https://askgrokwallet.io/askgrokwallet-demo.mp4) · also committed at [`assets/askgrokwallet-demo.mp4`](assets/askgrokwallet-demo.mp4) |
 | Interactive demo + approval inbox | [/demo](https://askgrokwallet.io/demo) · [/approvals](https://askgrokwallet.io/approvals) |
 | Public receipt log (live JSON) | https://askgrokwallet.io/api/receipts/chain |
