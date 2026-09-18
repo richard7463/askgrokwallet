@@ -119,6 +119,31 @@ BaseScan source verification has not been submitted yet; the canonical source is
 | Verifier sha256 | `ba066e7cdb19a0b9a5efb1eed6ba62d2440c9a5aeaee2d60caba12707acecf73` | `node verify-receipt.mjs --version` |
 | Live mirror | identical bytes to the release | `curl -sO https://askgrokwallet.io/verify-receipt.mjs` |
 
+### The agent's own wallet, on Base mainnet — 2026-09-18
+
+The policy layer is not the only place a bound can live. AskGrokWallet compiles the
+address-and-amount half of a policy into **wallet-layer rules** that a signing
+infrastructure enforces before a transaction is signed, and the agent's money sits in a
+wallet our backend never holds a key for (a server wallet: MPC key shares, API-token
+auth, no raw key in our process or the agent's).
+
+| Rule enforced before signing | Shape |
+| --- | --- |
+| No key export, ever | `deny` + `operationRestrictions.blockExport` |
+| Blocked counterparty | `deny` + `0x9999…9999` |
+| Allowed payee + USDC (its proxy **and** implementation) | `allow` + `valueLimit.maxPerCall = 50 USDC` |
+
+| Action | Transaction |
+| --- | --- |
+| Guarded payment, 0.10 USDC from the agent's wallet | [`0x2d73c475be9be8bfee8baffd699ffb34b9d18cf80a7a0c17e5ad1583d1181c0a`](https://basescan.org/tx/0x2d73c475be9be8bfee8baffd699ffb34b9d18cf80a7a0c17e5ad1583d1181c0a) |
+| Same payment without the rules in place (control) | [`0x93b5b65282fe62569606627789c4b493a4bcd5020aec92ea4eac4a72a21bd97c`](https://basescan.org/tx/0x93b5b65282fe62569606627789c4b493a4bcd5020aec92ea4eac4a72a21bd97c) |
+| Refused: payment to the blocked counterparty | nothing broadcast |
+| Refused: payment above the per-call limit | nothing broadcast |
+
+This closes the "no mainnet-value settlement has been demonstrated" gap: real USDC, Base
+mainnet, from a wallet whose key is not in our backend, with the bound enforced inside
+the signing infrastructure rather than in a log written afterwards.
+
 ### Outside review, kept as a test
 
 A reviewer on the Cursor forum ran the verifier against the demo and found a real bug:
@@ -378,7 +403,7 @@ the signing key inside the file.
 
 | Boundary | State (2026-09-18) |
 | --- | --- |
-| Value-moving end-to-end | Ethereum Sepolia with mock USDC (transactions above), plus the hosted approve→execute worker. No mainnet-value settlement has been demonstrated. |
+| Value-moving end-to-end | Ethereum Sepolia with mock USDC (transactions above), plus the hosted approve→execute worker — **and now a real Base mainnet USDC payment from the agent's own wallet under wallet-layer rules** (see above). Still an unaudited preview: do not treat one demonstration as a track record. |
 | Base mainnet | Contracts deployed and readable; a guarded mainnet round needs a funded mainnet vault. |
 | BaseScan source verification | Not submitted yet. Canonical source is [`contracts/`](contracts/) here, and the suite above is what CI compiles. |
 | ERC-8126 risk oracle | The optional `erc8126scan` precheck is implemented and off by default. Without a subscription key the paid lookup answers `402`, which tightens the verdict to `ask` — it never silently allows. |
