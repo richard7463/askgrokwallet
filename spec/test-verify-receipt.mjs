@@ -136,6 +136,7 @@ fs.writeFileSync(receiptPath, JSON.stringify(receipt, null, 2));
 // ── Stub node + stub log. `anchorBlock: null` is the mempool shape. ──────────
 let anchorBlock = "0xb1600f";
 let anchorStatus = "0x1";
+let receiptMode = "ok"; // "ok" | "null" | "error" | "nostatus"
 let calldataHead = headHash;
 
 const server = http.createServer(async (req, res) => {
@@ -167,6 +168,12 @@ const server = http.createServer(async (req, res) => {
     return json({ jsonrpc: "2.0", id: body.id, result: { to: CONTRACT, input: `0xdeadbeef${calldataHead}`, blockNumber: anchorBlock } });
   }
   if (req.url.startsWith("/rpc") && body?.method === "eth_getTransactionReceipt") {
+    if (receiptMode === "null") return json({ jsonrpc: "2.0", id: body.id, result: null });
+    if (receiptMode === "nostatus") return json({ jsonrpc: "2.0", id: body.id, result: { blockNumber: anchorBlock } });
+    if (receiptMode === "error") {
+      res.writeHead(500, { "content-type": "application/json" });
+      return res.end("{}");
+    }
     return json({ jsonrpc: "2.0", id: body.id, result: anchorBlock ? { blockNumber: anchorBlock, status: anchorStatus } : null });
   }
   res.writeHead(404);
@@ -208,6 +215,22 @@ const reverted = await verify(online);
 t("a reverted anchor is not called fixed onchain", /onchain\s+~/.test(reverted.out) && !/verdict\s+✓/.test(reverted.out), reverted.out);
 t("a reverted anchor says it reverted", /REVERTED/i.test(reverted.out), reverted.out);
 anchorStatus = "0x1";
+
+// ── 3b. The same failure shape, reached three other ways. A node that returns no
+// receipt, one that errors, and one that answers without a status all leave the
+// anchor's outcome unknown — and unknown used to be printed as "fixed onchain".
+// Reported from outside against the released 1.0.0 bytes; fixed in 1.0.1.
+for (const [mode, label] of [
+  ["null", "returns no receipt"],
+  ["error", "answers with an error"],
+  ["nostatus", "omits the receipt status"],
+]) {
+  receiptMode = mode;
+  const unknown = await verify(online);
+  t(`an anchor whose node ${label} is not called fixed onchain`,
+    /onchain\s+~/.test(unknown.out) && !/verdict\s+✓/.test(unknown.out), unknown.out);
+}
+receiptMode = "ok";
 
 // ── 4. An anchor whose calldata does not contain the head is a different claim
 // entirely — that is the issuer lying, and it stays fatal.
