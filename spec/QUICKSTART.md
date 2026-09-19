@@ -4,26 +4,28 @@ No install, no dependencies, Node 18+. You verify a real receipt that was
 issued on production and anchored onchain — without trusting us.
 
 ```bash
-curl -O https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.0/verify-receipt.mjs
-curl -O https://raw.githubusercontent.com/askgrokwallet/askgrokwallet/verify-receipt-v1.0.0/spec/example-receipt.json
+curl -O https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.1/verify-receipt.mjs
+curl -O https://raw.githubusercontent.com/askgrokwallet/askgrokwallet/verify-receipt-v1.0.1/spec/example-receipt.json
 node verify-receipt.mjs --version          # optional: version + sha256 of the file
 node verify-receipt.mjs example-receipt.json
 ```
 
-Both URLs are pinned to the `verify-receipt-v1.0.0` tag, so the file cannot change
-under you. `--version` prints the sha256 of the bytes you are running; compare it
-with the hash in the [release notes](https://github.com/askgrokwallet/askgrokwallet/releases/tag/verify-receipt-v1.0.0).
+Both URLs are pinned to the `verify-receipt-v1.0.1` tag, so the file cannot change
+under you. Compare the sha256 of the bytes you are running with the published
+[SHA256SUMS](https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.1/SHA256SUMS)
+**before** running the file — `--version` reports the hash after the code has already
+executed, which is a claim by the thing you are checking, not a gate on it.
 
-Expected output (verifier 1.0.0):
+Expected output (verifier 1.0.1):
 
 ```
 signature  ✓  22 fields signed (v3) · key 39626850145403d3 (pinned in this file)
-chain      ✓  entry 11 of 38 (imported) · links unbroken back to 1
+chain      ✓  entry 11 of 48 (imported) · links unbroken back to 1
 onchain    ✓  head 11 written in 0xb3d35ee618… block 11633900 · chain 11155111
 verdict    ✓  genuine, and fixed onchain
 ```
 
-`entry 11 of 38` is this receipt's fixed position in the log — entry 11 never
+`entry 11 of 48` is this receipt's fixed position in the log — entry 11 never
 changes, the total grows as the log grows, so yours will be larger.
 
 ### Or let the repository do it in one command

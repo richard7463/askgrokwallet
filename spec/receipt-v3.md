@@ -18,7 +18,7 @@ rewrite the log; after it, we cannot.
 ## Quick start
 
 ```bash
-curl -O https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.0/verify-receipt.mjs
+curl -O https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.1/verify-receipt.mjs
 node verify-receipt.mjs receipt.json
 ```
 
