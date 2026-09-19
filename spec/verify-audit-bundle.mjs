@@ -97,7 +97,6 @@ const entryHash = (entry) => sha256(["rc1",
   lengthPrefixed(entry.canonical),
 ].join("|"));
 
-const fingerprint = (b64) => sha256(Buffer.from(b64, "base64").toString("binary")).slice(0, 16);
 const fingerprintHex = (b64) => crypto.createHash("sha256").update(Buffer.from(b64, "base64")).digest("hex").slice(0, 16);
 const short = (value) => `${String(value).slice(0, 12)}…`;
 
@@ -142,6 +141,13 @@ try {
 const entries = payload.log?.entries ?? [];
 const anchors = payload.log?.anchors ?? [];
 console.log(`\nbundle: ${payload.receipts.length} receipt(s) · log ${entries.length} entries · ${anchors.length} anchor(s) · issued by ${payload.api}\n`);
+
+// An empty bundle is not a passing bundle. Without this, a sealed file containing nothing
+// would sail through every check below and report success — the one failure mode an
+// auditor would never catch by reading the output.
+if (!Array.isArray(payload.receipts) || payload.receipts.length === 0) {
+  bad("the bundle contains no receipts", "there is nothing here to audit; this is not a passing result");
+}
 
 if (!entries.length) {
   bad("the bundled log is empty");
