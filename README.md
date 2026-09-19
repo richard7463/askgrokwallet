@@ -9,7 +9,7 @@
     <a href="#deployed-and-verified-contracts"><img src="https://img.shields.io/badge/onchain-Base%20mainnet%20%2B%20Sepolia-38bdf8" alt="onchain"></a>
     <a href="contracts/docs/erc8196-alignment.md"><img src="https://img.shields.io/badge/implements-ERC--8196-000000" alt="ERC-8196"></a>
     <img src="https://img.shields.io/badge/contract%20tests-20%20passing-4f46e5" alt="20 contract tests passing">
-    <img src="https://img.shields.io/badge/receipt%20verifier-1.0.0-0ea5e9" alt="receipt verifier 1.0.0">
+    <img src="https://img.shields.io/badge/receipt%20verifier-1.0.1-0ea5e9" alt="receipt verifier 1.0.1">
     <img src="https://img.shields.io/badge/Runtime-NYC%202026-f59e0b" alt="Runtime NYC 2026">
   </p>
 </div>
@@ -55,7 +55,7 @@ and each one is checkable from outside this repository:
 | 30-second demo (video) | [askgrokwallet.io/askgrokwallet-demo.mp4](https://askgrokwallet.io/askgrokwallet-demo.mp4) · also committed at [`assets/askgrokwallet-demo.mp4`](assets/askgrokwallet-demo.mp4) |
 | Interactive demo + approval inbox | [/demo](https://askgrokwallet.io/demo) · [/approvals](https://askgrokwallet.io/approvals) |
 | Public receipt log (live JSON) | https://askgrokwallet.io/api/receipts/chain |
-| Receipt verifier — one file, zero dependencies | [release `verify-receipt-v1.0.0`](https://github.com/richard7463/askgrokwallet/releases/tag/verify-receipt-v1.0.0) · sha256 `ba066e7cdb19a0b9a5efb1eed6ba62d2440c9a5aeaee2d60caba12707acecf73` |
+| Receipt verifier — one file, zero dependencies | [release `verify-receipt-v1.0.1`](https://github.com/richard7463/askgrokwallet/releases/tag/verify-receipt-v1.0.1) · sha256 `32de3cad6f3bb23ae8415cd5afe5f54dd8167432a2473814e6ab4ec0b767317a` · check the hash **before** you run the file: `curl -sLO …/SHA256SUMS && shasum -a 256 -c SHA256SUMS` |
 | Check it yourself, in one command | `node spec/judge-check.mjs` — asserts the verifier is the released bytes, verifies a real receipt against the live log, and reports the log's size and integrity |
 | Write your own verifier, then check it | [`spec/vectors/`](spec/vectors/) — frozen canonical-bytes, hash and signature vectors, plus two implementations (Node and Python) that must reproduce the same bytes: `node spec/vectors/run-vectors.mjs` |
 | Show an auditor everything, the public nothing | [`spec/audit-bundle.md`](spec/audit-bundle.md) — receipts plus their log evidence, sealed to an auditor's key; `node spec/verify-audit-bundle.mjs` opens, verifies and reports, including what it cannot prove |
@@ -116,10 +116,10 @@ BaseScan source verification has not been submitted yet; the canonical source is
 
 | Check | Value (live, 2026-09-19) | Where to look |
 | --- | --- | --- |
-| Public log | 47 entries, 14 anchors, `intact: true` | https://askgrokwallet.io/api/receipts/chain |
-| Verifier version | `verify-receipt 1.0.0` | [release](https://github.com/richard7463/askgrokwallet/releases/tag/verify-receipt-v1.0.0) |
-| Verifier sha256 | `ba066e7cdb19a0b9a5efb1eed6ba62d2440c9a5aeaee2d60caba12707acecf73` | `node verify-receipt.mjs --version` |
-| Live mirror | identical bytes to the release | `curl -sO https://askgrokwallet.io/verify-receipt.mjs` |
+| Public log | `intact: true`; entries and anchors grow with every receipt | https://askgrokwallet.io/api/receipts/chain |
+| Verifier version | `verify-receipt 1.0.1` | [release](https://github.com/richard7463/askgrokwallet/releases/tag/verify-receipt-v1.0.1) |
+| Verifier sha256 | `32de3cad6f3bb23ae8415cd5afe5f54dd8167432a2473814e6ab4ec0b767317a` | `node verify-receipt.mjs --version` |
+| Live mirror | identical bytes to the release | `curl -sO https://askgrokwallet.io/verify-receipt.mjs && node verify-receipt.mjs --version` |
 
 ### The agent's own wallet, on Base mainnet — 2026-09-18
 
@@ -159,6 +159,19 @@ Fixed in 1.0.0, and their repro now lives in this repository:
 a stub node and a stub log, with no network. It **fails on the previous build with six
 assertions** — including `block 0` — and passes now. The same change covers a reverted
 anchor transaction, which used to read as fixed as well.
+
+**A second outside review found the same class of bug one layer deeper.** The
+maintainer of the Bankr skills repository read the released 1.0.0 bytes and noticed
+that the receipt question had three non-answers — no receipt, an RPC error, a receipt
+without a `status` — and all three fell through to `onchain ✓`. Inclusion was checked;
+execution was assumed. That is fixed in **1.0.1**, and their three cases are the
+`3b` block of the same test file: they **fail against the 1.0.0 bytes**
+(`ba066e7c…`) and pass against 1.0.1 (`32de3cad…`).
+
+Two outside reviewers, two real holes, both closed with a published release and a
+failing test kept in the repository. That is what the verification story has to
+survive to mean anything, and it is why the hash is pinned rather than the URL: you
+compare bytes, not a promise.
 
 ---
 
@@ -317,9 +330,10 @@ curl -s -X POST https://askgrokwallet.io/api/approvals/APPROVAL_ID \
   -d '{ "decision": "approve", "by": "operator@demo" }'
 
 # anyone checks the outcome — pinned release, not a moving URL
-BASE=https://github.com/richard7463/askgrokwallet/releases/download/verify-receipt-v1.0.0
+BASE=https://github.com/richard7463/askgrokwallet/releases/download/verify-receipt-v1.0.1
 curl -LO $BASE/verify-receipt.mjs && curl -LO $BASE/test-verify-receipt.mjs
-node verify-receipt.mjs --version        # 1.0.0 + the sha256 of the bytes you hold
+curl -sLO $BASE/SHA256SUMS && shasum -a 256 -c SHA256SUMS   # check the bytes BEFORE running them
+node verify-receipt.mjs --version        # 1.0.1 + the sha256 of the bytes you hold
 node test-verify-receipt.mjs             # check the verifier itself — no network
 node verify-receipt.mjs receipt.json
 ```
@@ -331,7 +345,14 @@ places this receipt's signing event at a fixed position in an append-only log li
 back to entry 1; **onchain** finds that log's head inside a blockchain transaction and
 requires it to be **in a block, successful**. An anchor that is only broadcast reads as
 `~` "broadcast but not in a block yet"; a reverted one reads as `~` with the reason.
-Neither claims to be fixed, because neither is.
+An anchor whose outcome the node would not report — no receipt, an RPC error, no
+`status` field — also reads as `~`, because unknown is not the same claim as settled.
+None of them claims to be fixed, because none of them is.
+
+And a `✓` is a statement about the **record**, not about a payment: an approval or a
+denial authenticates exactly as well as a payment, and `~` means *unverified*, not
+*fine*. If you need "did the money move", read the transaction the receipt names and
+compare it to what was authorized — the verifier will not make that claim for you.
 
 - Three-command quickstart against a real anchored receipt: [`spec/QUICKSTART.md`](spec/QUICKSTART.md)
 - The full specification, enough to write your own verifier: [`spec/receipt-v3.md`](spec/receipt-v3.md)
