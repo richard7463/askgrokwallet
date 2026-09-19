@@ -35,8 +35,9 @@ rule that fired. Every outcome is signed (Ed25519) and appended to the public
 hash-chained log, which the receipt verifier then checks offline:
 
 ```bash
-BASE=https://github.com/richard7463/askgrokwallet/releases/download/verify-receipt-v1.0.0
-curl -LO $BASE/verify-receipt.mjs
+BASE=https://github.com/richard7463/askgrokwallet/releases/download/verify-receipt-v1.0.1
+curl -LO $BASE/verify-receipt.mjs && curl -sLO $BASE/SHA256SUMS
+shasum -a 256 -c SHA256SUMS   # check the bytes before running them
 node verify-receipt.mjs receipt.json
 ```
 
