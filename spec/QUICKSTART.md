@@ -101,7 +101,7 @@ but not yet mined must never read as "fixed onchain". Keep both files in the sam
 directory:
 
 ```bash
-curl -O https://raw.githubusercontent.com/askgrokwallet/askgrokwallet/verify-receipt-v1.0.0/spec/test-verify-receipt.mjs
+curl -O https://raw.githubusercontent.com/askgrokwallet/askgrokwallet/verify-receipt-v1.0.1/spec/test-verify-receipt.mjs
 node test-verify-receipt.mjs
 ```
 
