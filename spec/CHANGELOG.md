@@ -12,6 +12,36 @@ If that hash is not the one in the release you meant to fetch, you are not runni
 what was reviewed — which is the only reason a verifier is allowed to live at a
 URL at all.
 
+## 1.0.1 — 2026-09-19
+
+### Fixed
+
+- **An unknown anchor outcome is no longer reported as a fixed log.** 1.0.0 asked
+  the node for the anchor transaction's receipt and treated *three* different
+  non-answers as success: a receipt that never arrives (`result: null`), an RPC
+  that throws, and a receipt with no `status` field. In all three the check printed
+  `onchain ✓` and the verdict said "genuine, and fixed onchain", so a log whose
+  anchor had reverted or never landed could read as settled. Each case is now
+  inconclusive (`onchain ~`, "whether the head reached … is unknown"), and the
+  verdict says so instead of claiming the chain fixes anything. Reported from
+  outside with a repro against the released 1.0.0 bytes; the repro is now three
+  assertions in `spec/test-verify-receipt.mjs`, and they fail against 1.0.0.
+
+  The distinction that matters: *inclusion* and *execution* are two claims. 1.0.0
+  was careful about the first and assumed the second.
+
+- **A positive verdict is about the record, not about a payment.** No code change —
+  this release's notes say it plainly, because a receipt with `txHash: null` that
+  authenticates an approval or a denial is still four ticks. The verifier
+  authenticates *what the issuer recorded*; it does not confirm that money moved.
+  See `spec/receipt-v3.md` §"What a receipt does not prove".
+
+### Unchanged
+
+Every field, canonicalization rule, hash and signature still verifies the same
+bytes. A receipt that verified under 1.0.0 verifies under 1.0.1 with the same
+result, except where an anchor outcome was unknown and was being overstated.
+
 ## 1.0.0 — 2026-09-15
 
 First tagged release. Same four lines of output as the untagged `main` copy of the

@@ -46,7 +46,7 @@ import { fileURLToPath } from "node:url";
 // ran the same thing, and "the copy from askgrokwallet.io" stops being an answer
 // the moment that page is redeployed. `--version` prints both; every release
 // publishes the same hash, so a mismatch is visible instead of silent.
-const VERIFIER_VERSION = "1.0.0";
+const VERIFIER_VERSION = "1.0.1";
 
 function selfSha256() {
   return crypto.createHash("sha256").update(fs.readFileSync(fileURLToPath(import.meta.url))).digest("hex");
@@ -365,24 +365,47 @@ async function checkOnchain(entry, entries, anchors) {
   // A mined hash proves the transaction was included. It does not prove the head
   // reached the contract: a reverted anchor keeps the head in its calldata while
   // writing nothing. Only the receipt says which of those happened, so ask for it
-  // and refuse to credit the weaker one.
+  // and take every answer seriously — including the three answers that used to
+  // read as success: a receipt that never arrives, an RPC that throws, and a
+  // receipt without a status field. Each of those leaves the outcome unknown, and
+  // unknown is not the same claim as "fixed onchain".
   let receipt = null;
+  let receiptError = null;
   try {
     const res = await getJson(rpc, { jsonrpc: "2.0", id: 1, method: "eth_getTransactionReceipt", params: [covering.txHash] });
     receipt = res.result;
-  } catch {
-    // Not every node answers this, and an unanswerable question is not evidence
-    // the anchor failed — the transaction object already put it in a block.
+  } catch (error) {
+    receiptError = error.message;
   }
   const block = blockHeight(receipt?.blockNumber ?? tx.blockNumber);
+  const where = block === null ? "in a block" : `in block ${block}`;
   if (receipt && receipt.status != null && String(receipt.status) !== "0x1") {
     return {
       mark: "~",
       reverted: true,
       note:
-        `anchor tx ${String(covering.txHash).slice(0, 12)}… is ${block === null ? "in a block" : `in block ${block}`} but it REVERTED — ` +
+        `anchor tx ${String(covering.txHash).slice(0, 12)}… is ${where} but it REVERTED — ` +
         `the head sits in its calldata, not in ${covering.contractAddress}; anyone resolving anchors ` +
         `against the contract finds nothing`,
+    };
+  }
+  if (!receipt) {
+    return {
+      mark: "~",
+      inconclusive: true,
+      note:
+        `anchor tx ${String(covering.txHash).slice(0, 12)}… is ${where}, but the node ` +
+        `${receiptError ? `could not answer for its receipt (${receiptError})` : "returned no receipt"} — ` +
+        `whether the head reached ${covering.contractAddress} is unknown, and an unknown outcome is not proof of a fixed log`,
+    };
+  }
+  if (receipt.status == null) {
+    return {
+      mark: "~",
+      inconclusive: true,
+      note:
+        `anchor tx ${String(covering.txHash).slice(0, 12)}… is ${where}, but its receipt carries no status — ` +
+        `inclusion alone does not show the head was written to ${covering.contractAddress}`,
     };
   }
   return {
@@ -422,6 +445,8 @@ async function main() {
             ? { mark: "~", note: "genuine, but its anchor is not in a block yet — not fixed onchain, and we could still rewrite the log" }
             : onchain.reverted
               ? { mark: "~", note: "genuine, but its anchor transaction reverted — the head never reached the contract, so the chain fixes nothing" }
+              : onchain.inconclusive
+                ? { mark: "~", note: "genuine, but the anchor's outcome could not be confirmed — whether this log is fixed onchain is unknown" }
               : chain.mark === "✓"
                 ? { mark: "~", note: "genuine, but not yet fixed onchain — we could still rewrite the log" }
                 : { mark: "~", note: "signature is genuine; the published log was not checked" };
