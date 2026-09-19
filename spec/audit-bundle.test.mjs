@@ -10,9 +10,10 @@
 
 import crypto from "node:crypto";
 import fs from "node:fs";
+import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -174,6 +175,82 @@ fs.writeFileSync(wrongKeyFile, JSON.stringify({
   bytes[0] ^= 0x01;
   const run = verify({ ...bundle, ciphertext: bytes.toString("base64") });
   t("a bundle altered after sealing does not open", run.code === 1 && /does not open/.test(run.out), run.out);
+}
+
+// ── an empty bundle is not a passing bundle ─────────────────────────────────
+{
+  const empty = verify(seal({ ...basePayload, receipts: [] }));
+  t("an empty bundle fails instead of passing quietly", empty.code === 1 && caughtBy(empty.out, "no receipts") !== "", empty.out);
+}
+
+// ── a key this file does not pin is named, not called a forgery ─────────────
+{
+  const vectors = JSON.parse(fs.readFileSync(path.join(SPEC, "vectors", "format-vectors.json"), "utf8"));
+  const vector = vectors.vectors.find((v) => v.id === "v3-basic");
+  const signed = {
+    chainSeq: 1, receiptId: vector.receipt.id, event: "created", prevHash: GENESIS,
+    signedAt: vector.receipt.signedAt, signature: vector.receipt.signature, canonical: vector.canonical,
+  };
+  const hash = entryHash(signed);
+  const published = { ...signed, entryHash: hash };
+  delete published.canonical;
+  delete published.signature;
+  const rotated = verify(seal({
+    ...basePayload,
+    receipts: [vector.receipt],
+    receiptPublicKey: vectors.publicKey,
+    log: { length: 1, headHash: hash, intact: true, entries: [published], anchors: [] },
+  }));
+  t("a bundle signed by an unpinned key says so", rotated.code === 0 && /~ the bundled receipts were signed by a key this file does not pin/.test(rotated.out), rotated.out);
+  t("a rotated key still verifies the receipt it signed", rotated.code === 0 && /✓ .* · signature — key 7233426d788f75a9/.test(rotated.out), rotated.out);
+}
+
+// ── the anchor, against a stub node ─────────────────────────────────────────
+// The receipt verifier got this wrong once (a broadcast anchor read as "fixed onchain"),
+// and an audit bundle is a second, independent implementation of the same check — so it
+// gets the same cases. The stub lives in this process, so the verifier runs as a child
+// with an async spawn; a blocking spawnSync here would deadlock.
+{
+  const state = { block: null, status: "0x1" };
+  const server = http.createServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const body = chunks.length ? JSON.parse(Buffer.concat(chunks).toString()) : {};
+    const json = (obj) => { res.writeHead(200, { "content-type": "application/json" }); res.end(JSON.stringify(obj)); };
+    if (body.method === "eth_getTransactionByHash") {
+      return json({ jsonrpc: "2.0", id: body.id, result: { to: anchor.contractAddress, input: `0xdeadbeef${anchor.headHash}`, blockNumber: state.block } });
+    }
+    if (body.method === "eth_getTransactionReceipt") {
+      return json({ jsonrpc: "2.0", id: body.id, result: state.block ? { blockNumber: state.block, status: state.status } : null });
+    }
+    json({ jsonrpc: "2.0", id: body.id, result: null });
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const rpc = `http://127.0.0.1:${server.address().port}`;
+
+  const withRpc = (bundle) => new Promise((resolve) => {
+    const file = path.join(tmp, `rpc-${Math.random().toString(36).slice(2)}.json`);
+    fs.writeFileSync(file, JSON.stringify(bundle, null, 2));
+    const child = spawn(process.execPath, [path.join(SPEC, "verify-audit-bundle.mjs"), file, `--viewing-key=${keyFile}`, `--rpc=${rpc}`]);
+    let out = "";
+    child.stdout.on("data", (d) => { out += d; });
+    child.stderr.on("data", (d) => { out += d; });
+    child.on("close", (code) => resolve({ code, out }));
+  });
+
+  const pending = await withRpc(seal(basePayload));
+  t("a broadcast-only anchor is not read as fixed", pending.code === 0 && /~ .* anchored — the anchor is broadcast but not in a block yet/.test(pending.out), pending.out);
+
+  state.block = "0xabc123";
+  state.status = "0x0";
+  const reverted = await withRpc(seal(basePayload));
+  t("a reverted anchor is not read as fixed", reverted.code === 0 && /~ .* anchored — .*reverted/.test(reverted.out), reverted.out);
+
+  state.status = "0x1";
+  const confirmed = await withRpc(seal(basePayload));
+  t("a mined, successful anchor is confirmed", confirmed.code === 0 && /✓ .* anchored — block \d+/.test(confirmed.out), confirmed.out);
+
+  server.close();
 }
 
 fs.rmSync(tmp, { recursive: true, force: true });
