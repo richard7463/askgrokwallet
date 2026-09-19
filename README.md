@@ -60,7 +60,7 @@ and each one is checkable from outside this repository:
 | Write your own verifier, then check it | [`spec/vectors/`](spec/vectors/) — frozen canonical-bytes, hash and signature vectors, plus two implementations (Node and Python) that must reproduce the same bytes: `node spec/vectors/run-vectors.mjs` |
 | Show an auditor everything, the public nothing | [`spec/audit-bundle.md`](spec/audit-bundle.md) — receipts plus their log evidence, sealed to an auditor's key; `node spec/verify-audit-bundle.mjs` opens, verifies and reports, including what it cannot prove |
 | Onchain proof | [transactions and blocks](#live-proof--checked-2026-09-18) · [deployed contracts](#deployed-and-verified-contracts) |
-| Tests you can run in three minutes | 20 contract tests · 10 verifier behaviour assertions · plugin package smoke test — see [Local run](#local-run) |
+| Tests you can run in three minutes | 20 contract tests · 13 verifier behaviour assertions · plugin package smoke test — see [Local run](#local-run) |
 | Track entered | **Bankr grand prize** — agentic commerce / autonomous financial agents |
 | Repository map | [below](#repository-map) |
 
