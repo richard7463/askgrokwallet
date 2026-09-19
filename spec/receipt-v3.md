@@ -271,6 +271,7 @@ a good receipt costs as much as a missed forgery.
 |---|---|---|
 | any `✗` | `✗` do not trust this receipt | 1 |
 | signature ✓ + onchain ✓ | `✓` genuine, and fixed onchain | 0 |
+| signature ✓, anchor outcome unknown | `~` genuine, but the anchor's outcome could not be confirmed | 0 |
 | signature ✓ + chain ✓, no anchor | `~` genuine, but we could still rewrite the log | 0 |
 | signature ✓, chain unchecked | `~` signature genuine; published log not checked | 0 |
 | signature unchecked | `~` nothing was verified (pass `--key=` to check offline) | 2 |
@@ -295,6 +296,30 @@ fingerprints named and tells you to make us publish the rotation before you trus
 The verifier also always prints where the key came from: `pinned by you` /
 `pinned in this file` / `fetched from the issuer — not independently pinned`. The last
 is plainly weaker and must not get the same tick as the others.
+
+### What a receipt does not prove
+
+This is the most misread part of the whole design, so it is stated without hedging.
+
+A receipt with four `✓` is a statement about **the record**: this issuer signed these
+fields, this record sits at this position in its log, and that log's head is in a
+transaction that executed. It is **not** a statement that money moved.
+
+Two consequences follow, and both are load-bearing:
+
+- **An approval receipt and a denial receipt authenticate just as well as a payment
+  receipt.** A denial is an outcome worth signing — but a `✓` on it does not mean a
+  payment happened. Neither does a `✓` on an approved record whose `txHash` is
+  `null`: the record is genuine, and nothing was spent.
+- **`✗` and `~` are not interchangeable.** `~` on the `onchain` line means the anchor
+  claim is *unverified*, not disproven. Anything that treats `~` as a pass is reading
+  the output wrong; anything that reports a completed payment off a `✓` is making a
+  claim the verifier never made.
+
+If you need "did this payment land", that is a separate question with a separate
+answer: read the transaction the receipt names, check its receipt status, and compare
+the transfer to the authorized request. Use `--json` and inspect the structured
+result rather than grepping the four lines.
 
 ## 6. Status — what is actually running
 

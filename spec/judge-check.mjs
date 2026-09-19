@@ -28,9 +28,9 @@ const RECEIPT = path.join(HERE, "example-receipt.json");
 // The released bytes. `verify-receipt.mjs --version` prints the same hash, and the
 // release notes publish it — three ways to the same number, none of them ours to
 // change after the fact.
-const RELEASE = "verify-receipt-v1.0.0";
+const RELEASE = "verify-receipt-v1.0.1";
 const RELEASE_URL = `https://github.com/richard7463/askgrokwallet/releases/tag/${RELEASE}`;
-const PINNED_SHA256 = "ba066e7cdb19a0b9a5efb1eed6ba62d2440c9a5aeaee2d60caba12707acecf73";
+const PINNED_SHA256 = "32de3cad6f3bb23ae8415cd5afe5f54dd8167432a2473814e6ab4ec0b767317a";
 const API = "https://askgrokwallet.io";
 
 const sha256 = (buffer) => crypto.createHash("sha256").update(buffer).digest("hex");
