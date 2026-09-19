@@ -1,6 +1,6 @@
 {
   "name": "@askgrokwallet/verify-receipt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Verify an AskGrokWallet receipt without trusting AskGrokWallet: signature, position in the hash-chained log, and onchain anchor, in one dependency-free file.",
   "license": "MIT",
   "author": "AskGrokWallet",

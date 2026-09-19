@@ -8,8 +8,8 @@ the same `SHA256SUMS`.
 
 | | |
 |---|---|
-| canonical file | [releases/download/verify-receipt-v1.0.0/verify-receipt.mjs](https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.0/verify-receipt.mjs) |
-| sha256 | printed by `npx -y @askgrokwallet/verify-receipt@1.0.0 --version` |
+| canonical file | [releases/download/verify-receipt-v1.0.1/verify-receipt.mjs](https://github.com/askgrokwallet/askgrokwallet/releases/download/verify-receipt-v1.0.1/verify-receipt.mjs) |
+| sha256 | `32de3cad6f3bb23ae8415cd5afe5f54dd8167432a2473814e6ab4ec0b767317a` — also in the release's `SHA256SUMS` |
 | dependencies | none — Node built-ins only |
 | node | >= 18 |
 
@@ -17,13 +17,13 @@ the same `SHA256SUMS`.
 
 ```bash
 # verify a receipt you were handed
-npx -y @askgrokwallet/verify-receipt@1.0.0 receipt.json
+npx -y @askgrokwallet/verify-receipt@1.0.1 receipt.json
 
 # signature only, no network at all
-npx -y @askgrokwallet/verify-receipt@1.0.0 receipt.json --offline
+npx -y @askgrokwallet/verify-receipt@1.0.1 receipt.json --offline
 
 # which verifier am I running?
-npx -y @askgrokwallet/verify-receipt@1.0.0 --version
+npx -y @askgrokwallet/verify-receipt@1.0.1 --version
 ```
 
 **Pin the version.** `@latest` means "whatever the registry serves today", which is
@@ -32,7 +32,7 @@ the same defect as fetching a verifier from a page that silently redeploys.
 Installing it globally works too, and is the same file:
 
 ```bash
-npm i -g @askgrokwallet/verify-receipt@1.0.0
+npm i -g @askgrokwallet/verify-receipt@1.0.1
 verify-receipt receipt.json
 ```
 
@@ -48,11 +48,17 @@ verify-receipt receipt.json
 A broadcast-but-unmined anchor is reported as `~` pending, never as fixed: a
 mempool transaction can be dropped, replaced, or reorged away. So is a reverted
 anchor transaction, which carries the log head in its calldata while writing
-nothing to the contract. Only `✗` — something provably wrong — withdraws the
+nothing to the contract. So is an anchor whose outcome the node will not report —
+no receipt, an RPC error, a receipt with no `status` field (fixed in 1.0.1; 1.0.0
+printed a tick for all three). Only `✗` — something provably wrong — withdraws the
 verdict.
 
-What it does **not** prove: that the payment was wise, or that the agent should
-have been allowed to make it.
+A `✓` is a statement about **the record**, not about a payment. An approval, a
+denial, and a receipt with `txHash: null` authenticate exactly as well as a
+payment does; `~` means *unverified*, never *fine*. What it does **not** prove:
+that money moved, that the payment was wise, or that the agent should have been
+allowed to make it. "Did it settle" is answered by the transaction the receipt
+names, not by these four lines.
 
 ## Flags
 
