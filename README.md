@@ -51,7 +51,7 @@ and each one is checkable from outside this repository:
 | What | Where |
 | --- | --- |
 | Live product | https://askgrokwallet.io |
-| Submission demo, 2:03 (video) | [askgrokwallet.io/askgrokwallet-demo-runtime.mp4](https://askgrokwallet.io/askgrokwallet-demo-runtime.mp4) — the product walkthrough plus the verification and outside-review segments |
+| Submission demo, 2:53 (video) | [askgrokwallet.io/askgrokwallet-demo-runtime.mp4](https://askgrokwallet.io/askgrokwallet-demo-runtime.mp4) — the product walkthrough plus the verification and outside-review segments |
 | 30-second demo (video) | [askgrokwallet.io/askgrokwallet-demo.mp4](https://askgrokwallet.io/askgrokwallet-demo.mp4) · also committed at [`assets/askgrokwallet-demo.mp4`](assets/askgrokwallet-demo.mp4) |
 | Interactive demo + approval inbox | [/demo](https://askgrokwallet.io/demo) · [/approvals](https://askgrokwallet.io/approvals) |
 | Public receipt log (live JSON) | https://askgrokwallet.io/api/receipts/chain |
@@ -114,9 +114,9 @@ BaseScan source verification has not been submitted yet; the canonical source is
 
 ### Receipts, live
 
-| Check | Value (2026-09-18) | Where to look |
+| Check | Value (live, 2026-09-19) | Where to look |
 | --- | --- | --- |
-| Public log | 38 entries, 10 anchors, `intact: true` | https://askgrokwallet.io/api/receipts/chain |
+| Public log | 47 entries, 14 anchors, `intact: true` | https://askgrokwallet.io/api/receipts/chain |
 | Verifier version | `verify-receipt 1.0.0` | [release](https://github.com/richard7463/askgrokwallet/releases/tag/verify-receipt-v1.0.0) |
 | Verifier sha256 | `ba066e7cdb19a0b9a5efb1eed6ba62d2440c9a5aeaee2d60caba12707acecf73` | `node verify-receipt.mjs --version` |
 | Live mirror | identical bytes to the release | `curl -sO https://askgrokwallet.io/verify-receipt.mjs` |
