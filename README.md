@@ -149,9 +149,10 @@ auth, no raw key in our process or the agent's).
 | Refused: payment to the blocked counterparty | nothing broadcast |
 | Refused: payment above the per-call limit | nothing broadcast |
 
-This closes the "no mainnet-value settlement has been demonstrated" gap: real USDC, Base
-mainnet, from a wallet whose key is not in our backend, with the bound enforced inside
-the signing infrastructure rather than in a log written afterwards.
+One real mainnet payment: USDC, Base mainnet, from a wallet whose key is not in our
+backend, with the bound enforced inside the signing infrastructure rather than in a log
+written afterwards. One payment on one rail is a demonstration, not a track record —
+the boundary table below says so in the same words.
 
 ### Outside review, kept as a test
 
