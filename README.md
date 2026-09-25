@@ -8,16 +8,17 @@
     <a href="https://askgrokwallet.io"><img src="https://img.shields.io/badge/live-askgrokwallet.io-10b981" alt="live"></a>
     <a href="#deployed-and-verified-contracts"><img src="https://img.shields.io/badge/onchain-Base%20mainnet%20%2B%20Sepolia-38bdf8" alt="onchain"></a>
     <a href="contracts/docs/erc8196-alignment.md"><img src="https://img.shields.io/badge/implements-ERC--8196-000000" alt="ERC-8196"></a>
-    <img src="https://img.shields.io/badge/contract%20tests-20%20passing-4f46e5" alt="20 contract tests passing">
+    <img src="https://img.shields.io/badge/contract%20tests-20%20(run%20locally)-4f46e5" alt="20 contract tests, run locally">
     <img src="https://img.shields.io/badge/receipt%20verifier-1.0.1-0ea5e9" alt="receipt verifier 1.0.1">
     <img src="https://img.shields.io/badge/Runtime-NYC%202026-f59e0b" alt="Runtime NYC 2026">
   </p>
 </div>
 
-> **Unaudited developer preview.** The guarded end-to-end path has been exercised
-> on Ethereum Sepolia with mock assets. Contracts are deployed on Base mainnet,
-> but no mainnet-value settlement has been demonstrated. Do not use this project
-> to protect production funds yet.
+> **Unaudited developer preview.** The guarded end-to-end path runs on Ethereum Sepolia
+> with mock assets; contracts are deployed on Base mainnet, and **one real mainnet
+> payment has been made** from an agent's own MPC wallet (0.1 USDC, listed under
+> "the agent's own wallet" below). That is a single payment on one rail, not a
+> production settlement path. Do not use this project to protect production funds yet.
 
 Giving an agent a wallet is easy. Giving it a wallet with **rules** is not.
 
@@ -110,7 +111,13 @@ mock USDC `0x860ee8efbaf9c72aac3cedcbaf65fb2756f71db2`.
 
 Deployment record: [`contracts/deployments/base-mainnet.json`](contracts/deployments/base-mainnet.json).
 BaseScan source verification has not been submitted yet; the canonical source is
-[`contracts/`](contracts/) here, which is what the CI suite compiles.
+[`contracts/`](contracts/) here, which compiles locally with
+`npm run contracts:compile` and passes `npm run contracts:test`.
+
+**On CI:** the workflows in this repository are correct, but **CI does not run** —
+GitHub Actions on this account is blocked by a billing issue, so every job fails
+before it starts. Every test result quoted anywhere in this project comes from a
+local run. Treat "CI" in this repository as configuration, not as coverage.
 
 ### Receipts, live
 
@@ -355,7 +362,15 @@ denial authenticates exactly as well as a payment, and `~` means *unverified*, n
 compare it to what was authorized — the verifier will not make that claim for you.
 
 - Three-command quickstart against a real anchored receipt: [`spec/QUICKSTART.md`](spec/QUICKSTART.md)
-- The full specification, enough to write your own verifier: [`spec/receipt-v3.md`](spec/receipt-v3.md)
+- Version history of the verifier: [`spec/CHANGELOG.md`](spec/CHANGELOG.md)
+
+**Read this before writing your own verifier.** [`spec/receipt-v3.md`](spec/receipt-v3.md)
+is the full specification and is enough for **v3 receipts**. Production currently signs
+**v4**, which adds the connector, action and execution-result fields — and there is no
+separate v4 prose document. The authoritative v4 field list is the verifier's
+`SIGNED_FIELDS[4]` and [`spec/receipt-v4.schema.json`](spec/receipt-v4.schema.json).
+Implementing from the v3 document alone computes the wrong canonical string for a v4
+receipt, so you would reject valid ones. (Raised by an outside review on 2026-09-25.)
 - Version history of the verifier: [`spec/CHANGELOG.md`](spec/CHANGELOG.md)
 
 There is also a hosted check endpoint — deliberately weaker, because it asks the issuer
@@ -397,7 +412,7 @@ tamper-evident chain.
 | Path | What is in it |
 | --- | --- |
 | [`contracts/`](contracts/) | Solidity 0.8.24 Hardhat project: `TrustLeaseController`, `BoundlessVault`, `VerificationScoreRegistry`, four test suites, deployment records |
-| [`spec/`](spec/) | The receipt specification (`receipt-v3.md`), JSON Schemas for the signature versions that have signed in production, the standalone verifier, its behaviour test, its changelog |
+| [`spec/`](spec/) | The receipt specification (**`receipt-v3.md`** — set aside a minute for the note above about v4), JSON Schemas for the signature versions that have signed in production, the standalone verifier, its behaviour test, its changelog |
 | [`npm/verify-receipt/`](npm/verify-receipt/) | npm mirror of the verifier; the tarball is assembled from `spec/` at pack time, so there is never a second copy to drift |
 | [`assets/`](assets/) | The 30-second walkthrough (mp4 + poster), logo |
 | [`examples/`](examples/) | Example approval request and policy files (payments, trading) |
@@ -455,7 +470,7 @@ the signing key inside the file.
 | --- | --- |
 | Value-moving end-to-end | Ethereum Sepolia with mock USDC (transactions above), plus the hosted approve→execute worker — **and now a real Base mainnet USDC payment from the agent's own wallet under wallet-layer rules** (see above). Still an unaudited preview: do not treat one demonstration as a track record. |
 | Base mainnet | Contracts deployed and readable; a guarded mainnet round needs a funded mainnet vault. |
-| BaseScan source verification | Not submitted yet. Canonical source is [`contracts/`](contracts/) here, and the suite above is what CI compiles. |
+| BaseScan source verification | Not submitted yet. Canonical source is [`contracts/`](contracts/) here; it compiles and passes its suite **locally** (CI cannot start on this account — see the note under Deployed and verified contracts). |
 | ERC-8126 risk oracle | The optional `erc8126scan` precheck is implemented and off by default. Without a subscription key the paid lookup answers `402`, which tightens the verdict to `ask` — it never silently allows. |
 | Grok host install | `grok plugin install` from this repository is the documented path; a real host install is not verifiable from here. |
 | x402 | The approval boundary is designed to compose with conditional payments; an end-to-end x402 payment rail is not implemented. |
