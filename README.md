@@ -60,6 +60,7 @@ and each one is checkable from outside this repository:
 | Check it yourself, in one command | `node spec/judge-check.mjs` — asserts the verifier is the released bytes, verifies a real receipt against the live log, and reports the log's size and integrity |
 | Write your own verifier, then check it | [`spec/vectors/`](spec/vectors/) — frozen canonical-bytes, hash and signature vectors, plus two implementations (Node and Python) that must reproduce the same bytes: `node spec/vectors/run-vectors.mjs` |
 | Show an auditor everything, the public nothing | [`spec/audit-bundle.md`](spec/audit-bundle.md) — receipts plus their log evidence, sealed to an auditor's key; `node spec/verify-audit-bundle.mjs` opens, verifies and reports, including what it cannot prove |
+| Hand someone a package they can check themselves | [`spec/make-verifiable-package.mjs`](spec/make-verifiable-package.mjs) — a folder for finance or a client: `entries.csv`, the receipts, the released verifier, `SHA256SUMS`, and a plain-language page saying what it proves and what it does not. `node spec/verifiable-package.test.mjs` builds one, verifies every receipt offline, tampers with a copy and asserts the verifier rejects it (20 assertions) |
 | Onchain proof | [transactions and blocks](#live-proof--checked-2026-09-18) · [deployed contracts](#deployed-and-verified-contracts) |
 | Tests you can run in three minutes | 20 contract tests · 13 verifier behaviour assertions · plugin package smoke test — see [Local run](#local-run) |
 | Track entered | **Bankr grand prize** — agentic commerce / autonomous financial agents |
@@ -413,7 +414,7 @@ tamper-evident chain.
 | Path | What is in it |
 | --- | --- |
 | [`contracts/`](contracts/) | Solidity 0.8.24 Hardhat project: `TrustLeaseController`, `BoundlessVault`, `VerificationScoreRegistry`, four test suites, deployment records |
-| [`spec/`](spec/) | The receipt specification (**`receipt-v3.md`** — set aside a minute for the note above about v4), JSON Schemas for the signature versions that have signed in production, the standalone verifier, its behaviour test, its changelog |
+| [`spec/`](spec/) | The receipt specification (**`receipt-v3.md`** — set aside a minute for the note above about v4), JSON Schemas for the signature versions that have signed in production, the standalone verifier, its behaviour test, its changelog, the audit-bundle pair, the conformance vectors, and the verifiable-package builder |
 | [`npm/verify-receipt/`](npm/verify-receipt/) | npm mirror of the verifier; the tarball is assembled from `spec/` at pack time, so there is never a second copy to drift |
 | [`assets/`](assets/) | The 30-second walkthrough (mp4 + poster), logo |
 | [`examples/`](examples/) | Example approval request and policy files (payments, trading) |
